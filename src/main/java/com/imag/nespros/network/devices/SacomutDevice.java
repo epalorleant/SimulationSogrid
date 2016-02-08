@@ -21,12 +21,15 @@ public class SacomutDevice extends Device {
         this.setTotalMemory(5000);
         this.setDeviceType(DeviceType.SACOMUT);
         this.setDeviceName(name);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"sacomut.jpg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"sacomut.jpg").getFile();
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"sacomut.jpg").getImage());
     }
 
     public SacomutDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.SACOMUT);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"sacomut.jpg").getImage());
+         String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"sacomut.jpg").getFile();
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
     }
 
 }

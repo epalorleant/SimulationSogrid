@@ -26,7 +26,7 @@ public class EdgePropertyDialog extends javax.swing.JDialog {
         this.nameTextField.setText(link.getID());
         this.latencySpinner.setValue(link.getLatency());
         this.bandwithSpinner.setValue(link.getBandwidth());
-        //this.lossRateSpinner.setValue(link.getLossRate());
+        this.lossRateSpinner.setValue(link.getLossRate());
     }
 
     /**
@@ -128,6 +128,7 @@ public class EdgePropertyDialog extends javax.swing.JDialog {
         link.setID(nameTextField.getText());
         link.setLatency((int)latencySpinner.getValue());
         link.setDefinedlatency(link.getLatency());
+        link.setLossRate((double)lossRateSpinner.getValue());
         dispose();
         //link.set
     }//GEN-LAST:event_jButton1ActionPerformed

@@ -22,12 +22,16 @@ public class HTACoordDevice extends Device {
         this.setTotalMemory(10000);
         this.setDeviceType(DeviceType.HTA_COORD);
         this.setDeviceName(name);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"htaCoord.jpg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"htaCoord.jpg").getFile();
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"htaCoord.jpg").getImage());
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
     }
 
     public HTACoordDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.HTA_COORD);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"htaCoord.jpg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"htaCoord.jpg").getFile();
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"htaCoord.jpg").getImage());
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
     }
     
     

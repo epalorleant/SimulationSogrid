@@ -45,7 +45,7 @@ public class MyMouseMenus {
             this.add(new SizeDisplay());
             this.add(new LatencyDisplay());
             this.add(new BandwidthDisplay());
-
+            this.add(new LossRateDisplay());
             this.addSeparator();
             this.add(new EdgePropItem(frame));
         }
@@ -114,6 +114,13 @@ public class MyMouseMenus {
 
         public void setEdgeAndView(ComLink e, VisualizationViewer visComp) {
             this.setText("latency = " + e.getLatency());
+        }
+    }
+    
+    public static class LossRateDisplay extends JMenuItem implements EdgeMenuListener<ComLink> {
+
+        public void setEdgeAndView(ComLink e, VisualizationViewer visComp) {
+            this.setText("loss rate = " + e.getLossRate());
         }
     }
 

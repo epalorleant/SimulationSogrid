@@ -19,6 +19,8 @@ import com.imag.nespros.samples.consumer.Consumer;
 import com.imag.nespros.samples.event.MeterEvent;
 import com.imag.nespros.samples.producer.MeterSimulator;
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -34,13 +36,13 @@ public class Launcher {
     static String[] meterSchema = {"timestampUTC", "realPowerWatts", "meterID"};
     static String[] types = {"long", "double", "String"};
     static char Sep = File.separatorChar;
-    final static String path = "microgrid";
+    final static String path = "dataset";
     static int NUMBER = 3;
     static long delay = 5000;
     static int duration = 0;
     
             
-    public static void main(String[] args){
+    public static void main(String[] args) throws URISyntaxException{
         //Sim_system.initialise();
         ArrayList<EPUnit> operators = new ArrayList<>();
         if (args.length == 3) {
@@ -62,7 +64,9 @@ public class Launcher {
         aggregate.setUsedMemory(50);
         operators.add(aggregate);
          operators.add(filter);
-        File folder = new File(path);
+         ResourceLoader r = new ResourceLoader();
+        File folder = r.getRessource(path);
+        //File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile() && !listOfFiles[i].isHidden() && i < NUMBER) {

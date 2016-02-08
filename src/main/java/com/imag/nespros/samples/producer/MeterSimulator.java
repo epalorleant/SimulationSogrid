@@ -44,7 +44,8 @@ public class MeterSimulator extends EventProducer {
         this.delay = delay;
         this.definedDelay = delay;
         this.fileName = fileName;
-        loader = new CSVFileLoader2EvenBean(new File(fileName), propertyOrder, dataTypes);
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        loader = new CSVFileLoader2EvenBean(new File(cl.getResource(fileName).getFile()), propertyOrder, dataTypes);
         realValues = new ArrayList<>();
         random = new Random();
     }

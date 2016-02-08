@@ -5,6 +5,7 @@
  */
 package com.imag.nespros.network.devices;
 
+import cern.jet.random.Binomial;
 import cern.jet.random.Normal;
 import cern.jet.random.engine.RandomEngine;
 import com.imag.nespros.gui.animation.EdgeAnimation;
@@ -18,7 +19,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  *
  * @author epaln
@@ -30,11 +30,14 @@ public class ComLink extends Thread {
     private int size;
     private int bandwidth;
     private LinkedBlockingQueue<EventPacket> pendingPackets;
-    
+    private double lossRate;
+    //private int packetlost;
+
     // for display control
     private int definedlatency;
     private Normal normalDist;
     private MyLogger logger;
+    private Binomial bernoulliDist;
 
     //private double var;
     /**
@@ -50,10 +53,12 @@ public class ComLink extends Thread {
         //outputPort2 = new Sim_port("Out2");
         //add_port(outputPort2);
         pendingPackets = new LinkedBlockingQueue<>();
-        logger = new MyLogger("Latencies_"+ID);
-        
+        logger = new MyLogger("Latencies_" + ID);
+
         //delay = new Sim_normal_obj("Latency", latency, var);
         normalDist = new Normal(0, 1, RandomEngine.makeDefault());
+        lossRate = 0.05;
+        bernoulliDist = new Binomial(1, lossRate, RandomEngine.makeDefault());
     }
 
     public ComLink(int latency, String ID, int size, int bandwidth) {
@@ -63,7 +68,7 @@ public class ComLink extends Thread {
         this.size = size;
         this.bandwidth = bandwidth;
         normalDist.setState(latency, Math.sqrt(latency));
-        
+
     }
 
     public int getLatency() {
@@ -71,7 +76,7 @@ public class ComLink extends Thread {
     }
 
     public void setLatency(int latency) {
-        this.latency = latency; 
+        this.latency = latency;
         normalDist.setState(latency, Math.sqrt(latency));
     }
 
@@ -111,7 +116,16 @@ public class ComLink extends Thread {
     public void setDefinedlatency(int definedlatency) {
         this.definedlatency = definedlatency;
     }
-    
+
+    public double getLossRate() {
+        return lossRate;
+    }
+
+    public void setLossRate(double lossRate) {
+        this.lossRate = lossRate;
+        bernoulliDist.setNandP(1, lossRate);
+    }
+
 
     /*
      public Sim_port getOutputPort1() {
@@ -133,14 +147,20 @@ public class ComLink extends Thread {
 
     @Override
     public void run() {
-        logger.log("Timestamp, Latency");
+        logger.log("Timestamp, Latency, #Try");
         while (true) {
             try {
-                EventPacket packet = pendingPackets.take();           
+                EventPacket packet = pendingPackets.take();
+                int overhead =0, tried=1;
+                while(bernoulliDist.nextInt()==1){
+                    overhead+=latency;
+                    tried ++;
+                }
+                
                 // The communication can be in both direction, compute the right direction of the packet
                 int direction = getDirection(packet);
-                Object lock = new Object(); 
-                int currentLatency = (int)Math.floor(normalDist.nextDouble());
+                Object lock = new Object();
+                int currentLatency = (int) Math.floor(normalDist.nextDouble())+ overhead;
                 synchronized (lock) {
                     if (direction == 0) { // the default edge direction, send the event on the direct direction
                         Device d = Topology.getInstance().getGraph().getDest(this);
@@ -155,9 +175,9 @@ public class ComLink extends Thread {
                         lock.wait();
                         d.putEventPacket(packet);
                     }
-                    logger.log(System.currentTimeMillis()+", "+ currentLatency);
+                    logger.log(System.currentTimeMillis() + ", " + currentLatency+", "+tried);
                 }
-                
+
             } catch (InterruptedException ex) {
 
             }

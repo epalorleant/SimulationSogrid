@@ -19,7 +19,9 @@ public class AMIDevice extends Device {
 
     public AMIDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.AMI);
-        icon = new MyLayeredIcon(new ImageIcon("icons"+File.separator+"meter.jpeg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"meter.jpeg").getFile();
+        //icon = new MyLayeredIcon(new ImageIcon("icons"+File.separator+"meter.jpeg").getImage());
+        icon = new MyLayeredIcon(new ImageIcon(imageURI).getImage());
     }
 
     public AMIDevice(String name) {
@@ -28,7 +30,9 @@ public class AMIDevice extends Device {
         this.setTotalMemory(1000);
         this.setDeviceType(DeviceType.AMI);
         this.setDeviceName(name); 
-        icon = new MyLayeredIcon(new ImageIcon("icons"+File.separator+"meter.jpeg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"meter.jpeg").getFile();
+        //icon = new MyLayeredIcon(new ImageIcon("icons"+File.separator+"meter.jpeg").getImage());
+        icon = new MyLayeredIcon(new ImageIcon(imageURI).getImage());
     }
     
     

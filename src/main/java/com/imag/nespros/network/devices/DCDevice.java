@@ -22,12 +22,16 @@ public class DCDevice extends Device {
         this.setTotalMemory(700);
         this.setDeviceType(DeviceType.DC);
         this.setDeviceName(name);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"dc.jpeg").getImage());
+         String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"dc.jpeg").getFile();
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"dc.jpeg").getImage());
     }
 
     public DCDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.DC);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"dc.jpeg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"dc.jpeg").getFile();
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"dc.jpeg").getImage());
     }  
     
 }

@@ -22,10 +22,14 @@ public class UtilityDevice extends Device {
         this.setTotalMemory(10);
         this.setDeviceType(DeviceType.UTILITY);
         this.setDeviceName(name);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"utility.jpg").getFile();
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
     }
     public UtilityDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.UTILITY);
-        icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
+        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
+        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"utility.jpg").getFile();
+        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
     }
 }
