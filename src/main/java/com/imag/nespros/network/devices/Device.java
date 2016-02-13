@@ -123,7 +123,7 @@ public class Device extends Thread implements Serializable {
         this.inputQueue = inputQueue;
     }
 
-    public synchronized void putEventPacket(EventPacket packet) {
+    public synchronized void receiveEventPacket(EventPacket packet) {
         inputQueue.add(packet);
     }
 
@@ -138,35 +138,23 @@ public class Device extends Thread implements Serializable {
     @Override
     public void run() {
         while (true) {
-            try {
-                //Sim_event e = new Sim_event();
-                // Get the next event
-                //sim_get_next(e);
-                EventPacket packet = inputQueue.take();
-                //System.out.println("Device "+getDeviceName()+" received event: "+packet);
-                //EventPacket packet = (EventPacket) e.get_data();
+            try {                
+                EventPacket packet = inputQueue.take();                
                 if (packet.getPath().isEmpty() || packet.getDestination() == this) { // then, the packet arrived at destination. We can process it here.
                     process(packet);
                 } else { // then, the packet is just passing. Forward it!
                     forwardEventPacket(packet);
-                }
-                // The event has completed service
-                //sim_completed(e);
+                }                
             } catch (InterruptedException ex) {
                 Logger.getLogger(Device.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
 
-    private void process(EventPacket packet) {
+    protected void process(EventPacket packet) {
         pubSubService.publish(packet.getEvent(), packet.getTopic());
     }
 
-    /*
-     public Sim_port getInputPort() {
-     return inputPort;
-     }
-     */
     public PubSubService getPubSubService() {
         return pubSubService;
     }
@@ -185,7 +173,7 @@ public class Device extends Thread implements Serializable {
      * @param packet
      * @param dest
      */
-    protected void sendEventPacket(EventPacket packet, Device dest) {
+    protected void sendPacket(EventPacket packet, Device dest) {
         // set the destination of this packet.
         packet.setDestination(dest);
         forwardEventPacket(packet);
@@ -205,7 +193,7 @@ public class Device extends Thread implements Serializable {
             }
             EventPacket packet = new EventPacket(this, event, topic);
             packet.setColor(packetColor);
-            sendEventPacket(packet, dest);
+            sendPacket(packet, dest);
         }
     }
 

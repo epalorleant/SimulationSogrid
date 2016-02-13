@@ -14,6 +14,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
@@ -33,14 +36,14 @@ public class CSVFileLoader2EvenBean {
     private ArrayList<EventBean> data;
     private String[] types;
 
-    public CSVFileLoader2EvenBean(File file, String[] format, String[] types) {
-        this.file = file;
+    public CSVFileLoader2EvenBean(InputStream file, String[] format, String[] types) {
+        //this.file = file;
         this.format = format;
         this.types = types;
         try {
-            input = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(CSVFileLoader.class.getName()).log(Level.SEVERE, null, ex);
+            input = new BufferedReader(new InputStreamReader(file,"UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(CSVFileLoader2EvenBean.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

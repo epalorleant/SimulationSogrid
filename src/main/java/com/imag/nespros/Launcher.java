@@ -19,7 +19,6 @@ import com.imag.nespros.samples.consumer.Consumer;
 import com.imag.nespros.samples.event.MeterEvent;
 import com.imag.nespros.samples.producer.MeterSimulator;
 import java.io.File;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +35,7 @@ public class Launcher {
     static String[] meterSchema = {"timestampUTC", "realPowerWatts", "meterID"};
     static String[] types = {"long", "double", "String"};
     static char Sep = File.separatorChar;
-    final static String path = "dataset";
+    final static String path = "microgrid";
     static int NUMBER = 3;
     static long delay = 5000;
     static int duration = 0;
@@ -65,21 +64,19 @@ public class Launcher {
         operators.add(aggregate);
          operators.add(filter);
          ResourceLoader r = new ResourceLoader();
-        File folder = r.getRessource(path);
-        //File folder = new File(path);
-        File[] listOfFiles = folder.listFiles();
+        //File folder = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());//r.getRessource(path);
+        String[] listOfFiles = r.listFiles(path); 
+       
         for (int i = 0; i < listOfFiles.length; i++) {
-            if (listOfFiles[i].isFile() && !listOfFiles[i].isHidden() && i < NUMBER) {
-                String file = path + Sep + listOfFiles[i].getName();
-                MeterSimulator simulator = new MeterSimulator(listOfFiles[i].getName(),"MeterEvent", file, meterSchema, types, delay, MeterEvent.class)
+            if ( i < NUMBER) {                                              
+                MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"MeterEvent", 
+                        r.getRessource(listOfFiles[i]), meterSchema, types, delay, MeterEvent.class)
                         .simulate("realPowerWatts");
-                 operators.add(simulator);                
-                //AMIDevice device = new AMIDevice("AMI_"+i);
-                //device.setTotalMemory(0);                
-                //device.addEPUnit(simulator);
-                simulator.setMapped(false);
-                //Topology.getInstance().getGraph().addVertex(device);                
-                //DeviceFactory.setAmiCount(i+1);
+                 operators.add(simulator);                                
+                simulator.setMapped(false);                
+            }
+            else{
+                break;
             }
         }
         EPGraph.getInstance().AddEPGraphFromList(operators);        

@@ -7,7 +7,11 @@ package com.imag.nespros.network.devices;
 
 import com.imag.nespros.gui.plugin.MyLayeredIcon;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import org.apache.commons.io.IOUtils;
 
 /**
  * Le SACOMUT est un boitier modulaire embarquant un processeur applicatif de type ARM9 (450MHz) 
@@ -21,15 +25,24 @@ public class SacomutDevice extends Device {
         this.setTotalMemory(5000);
         this.setDeviceType(DeviceType.SACOMUT);
         this.setDeviceName(name);
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"sacomut.jpg").getFile();
-        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
-        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"sacomut.jpg").getImage());
+        try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"sacomut.jpg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public SacomutDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.SACOMUT);
-         String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"sacomut.jpg").getFile();
-        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+         try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"sacomut.jpg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
 }

@@ -8,7 +8,11 @@ package com.imag.nespros.network.devices;
 
 import com.imag.nespros.gui.plugin.MyLayeredIcon;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import org.apache.commons.io.IOUtils;
 
 /**
  * un serveur HP ProLiant DL360  Gen 9  (rackable) avec  processeur 1.6GHz 6-core 1P  et  16GB  de RAM.
@@ -22,16 +26,24 @@ public class HTACoordDevice extends Device {
         this.setTotalMemory(10000);
         this.setDeviceType(DeviceType.HTA_COORD);
         this.setDeviceName(name);
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"htaCoord.jpg").getFile();
-        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"htaCoord.jpg").getImage());
-        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"htaCoord.jpg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public HTACoordDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.HTA_COORD);
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"htaCoord.jpg").getFile();
-        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"htaCoord.jpg").getImage());
-        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"htaCoord.jpg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     

@@ -8,7 +8,11 @@ package com.imag.nespros.network.devices;
 
 import com.imag.nespros.gui.plugin.MyLayeredIcon;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -19,9 +23,13 @@ public class AMIDevice extends Device {
 
     public AMIDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.AMI);
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"meter.jpeg").getFile();
-        //icon = new MyLayeredIcon(new ImageIcon("icons"+File.separator+"meter.jpeg").getImage());
-        icon = new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"meter.jpeg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public AMIDevice(String name) {
@@ -30,9 +38,16 @@ public class AMIDevice extends Device {
         this.setTotalMemory(1000);
         this.setDeviceType(DeviceType.AMI);
         this.setDeviceName(name); 
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"meter.jpeg").getFile();
+        //String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"meter.jpeg").getFile();
         //icon = new MyLayeredIcon(new ImageIcon("icons"+File.separator+"meter.jpeg").getImage());
-        icon = new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+       // icon = new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+        try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"meter.jpeg"));           
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     

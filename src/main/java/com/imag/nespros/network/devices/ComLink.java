@@ -145,39 +145,45 @@ public class ComLink extends Thread {
         }
     }
 
+    protected boolean send(EventPacket packet) {
+
+        int overhead = 0, tried = 1;
+        while (bernoulliDist.nextInt() == 1) {
+            overhead += latency;
+            tried++;
+        }
+        int currentLatency = (int) Math.floor(normalDist.nextDouble()) + overhead;
+        Object lock = new Object();
+        // The communication can be in both direction, compute the right direction of the packet
+        int direction = getDirection(packet);
+        try {
+            synchronized (lock) {
+                if (direction == 0) { // the default edge direction, send the event on the direct direction
+                    Device d = Topology.getInstance().getGraph().getDest(this);
+                    showMessageAnimation(direction, currentLatency, lock, packet.getColor());
+                    lock.wait();
+                    d.receiveEventPacket(packet);                    
+                } else { //the opposite direction
+                    Device d = Topology.getInstance().getGraph().getSource(this);
+                    showMessageAnimation(direction, currentLatency, lock, packet.getColor());
+                    lock.wait();
+                    d.receiveEventPacket(packet);
+                }
+                logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried);
+            }
+        } catch (InterruptedException ex) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void run() {
         logger.log("Timestamp, Latency, #Try");
         while (true) {
             try {
                 EventPacket packet = pendingPackets.take();
-                int overhead =0, tried=1;
-                while(bernoulliDist.nextInt()==1){
-                    overhead+=latency;
-                    tried ++;
-                }
-                
-                // The communication can be in both direction, compute the right direction of the packet
-                int direction = getDirection(packet);
-                Object lock = new Object();
-                int currentLatency = (int) Math.floor(normalDist.nextDouble())+ overhead;
-                synchronized (lock) {
-                    if (direction == 0) { // the default edge direction, send the event on the direct direction
-                        Device d = Topology.getInstance().getGraph().getDest(this);
-                        showMessageAnimation(direction, currentLatency, lock, packet.getColor());
-                        lock.wait();
-                        d.putEventPacket(packet);
-                        //sim_schedule(outputPort1.get_pname(), 0.0, 1, packet);
-                    } else { //the opposite direction, use inputPort2
-                        //sim_schedule(outputPort2, latency, 2, packet);
-                        Device d = Topology.getInstance().getGraph().getSource(this);
-                        showMessageAnimation(direction, currentLatency, lock, packet.getColor());
-                        lock.wait();
-                        d.putEventPacket(packet);
-                    }
-                    logger.log(System.currentTimeMillis() + ", " + currentLatency+", "+tried);
-                }
-
+                send(packet);
             } catch (InterruptedException ex) {
 
             }

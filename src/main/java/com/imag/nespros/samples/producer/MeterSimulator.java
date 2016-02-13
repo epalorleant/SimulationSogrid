@@ -10,6 +10,7 @@ import com.imag.nespros.runtime.client.EventProducer;
 import com.imag.nespros.runtime.event.EventBean;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -25,7 +26,7 @@ public class MeterSimulator extends EventProducer {
     CSVFileLoader2EvenBean loader;
     String typeName;
     
-    String fileName;
+    File file;
     ArrayList<EventBean> realValues;
     double SOMME = 0;
     double ECART_TYPE = 0;
@@ -37,15 +38,15 @@ public class MeterSimulator extends EventProducer {
     Random random;
     int mean;
 
-    public MeterSimulator(String name, String typeName, String fileName, String[] propertyOrder,
+    public MeterSimulator(String name, String typeName, InputStream file, String[] propertyOrder,
             String[] dataTypes, long delay, Class clazz) {
         super(name, typeName, clazz);
         this.typeName = typeName;
         this.delay = delay;
         this.definedDelay = delay;
-        this.fileName = fileName;
+        //this.file = file;
         ClassLoader cl = ClassLoader.getSystemClassLoader();
-        loader = new CSVFileLoader2EvenBean(new File(cl.getResource(fileName).getFile()), propertyOrder, dataTypes);
+        loader = new CSVFileLoader2EvenBean(file, propertyOrder, dataTypes);
         realValues = new ArrayList<>();
         random = new Random();
     }

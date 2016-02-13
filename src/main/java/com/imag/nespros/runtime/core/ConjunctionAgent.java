@@ -32,7 +32,7 @@ public class ConjunctionAgent extends EPUnit {
         this._info = info;
         this._type = "Conjunction";
         this._receivers[0] = new TopicReceiver(this);
-        this._receivers[1] = new TopicReceiver(this);
+        this._receivers[1] = new TopicReceiver(this, (short)1);
         inputTerminalL = new IOTerminal(IDinputTerminalL, "input channel " + _type, _receivers[0], this);
         inputTerminalR = new IOTerminal(IDinputTerminalR, "input channel " + _type, _receivers[1], this);
         outputTerminal = new IOTerminal(IDoutputTerminal, "output channel " + _type, this);

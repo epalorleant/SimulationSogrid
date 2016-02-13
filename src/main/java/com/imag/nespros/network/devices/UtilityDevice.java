@@ -8,7 +8,11 @@ package com.imag.nespros.network.devices;
 
 import com.imag.nespros.gui.plugin.MyLayeredIcon;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -22,14 +26,23 @@ public class UtilityDevice extends Device {
         this.setTotalMemory(10);
         this.setDeviceType(DeviceType.UTILITY);
         this.setDeviceName(name);
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"utility.jpg").getFile();
-        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
-        //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
+        try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"utility.jpg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     public UtilityDevice(String name, double cpuSpeed, int totalMemory) {
         super(name, cpuSpeed, totalMemory, DeviceType.UTILITY);
         //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
-        String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"utility.jpg").getFile();
-        icon= new MyLayeredIcon(new ImageIcon(imageURI).getImage());
+       try {
+            byte[] imageInByte;            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"utility.jpg"));            
+            icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
+        } catch (IOException ex) {
+            Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
