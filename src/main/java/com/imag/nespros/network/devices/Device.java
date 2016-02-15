@@ -9,10 +9,14 @@ import com.imag.nespros.gui.plugin.MyLayeredIcon;
 import com.imag.nespros.network.routing.EventPacket;
 import com.imag.nespros.network.routing.PubSubService;
 import com.imag.nespros.network.routing.Topic2Device;
+import com.imag.nespros.network.routing.Topology;
 import com.imag.nespros.runtime.core.EPUnit;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
@@ -128,20 +132,55 @@ public class Device extends Thread implements Serializable {
     }
 
     private void forwardEventPacket(EventPacket packet) {
+        // for routing ijn the right direction ;)
         packet.setOrigin(this);
-        packet.setPathToDestination();
-        ComLink link = packet.getPath().remove(0);
+        HashMap<ComLink, EventPacket> map = new HashMap<>();
+        //EventPacket ep = packet.clone();
+        for(Device d: packet.getDestination()){
+            ComLink interf = getPathToDestination(this, d);
+            // do not send back the packet over its input port/link
+            if(interf == packet.getInputLink() || interf == null){
+                continue;
+            }
+            EventPacket ep = map.get(interf);
+            if(ep == null){
+                ep = packet.clone();
+                ep.getDestination().add(d);
+                map.put(interf, ep);
+            }
+            else{
+                ep.getDestination().add(d);               
+            }
+        }
+        for(ComLink link: map.keySet()){
+            EventPacket ep = map.get(link);
+            link.putPacket(ep);
+        }
+//        packet.setPathToDestination(this, );
+//        ComLink link = packet.getPath().remove(0);
         // send the event packet over the link
-        link.putPacket(packet);
+//        link.putPacket(packet);
     }
 
+    private ComLink getPathToDestination(Device depart, Device dest){ 
+        List<ComLink> apath = Topology.getInstance().getPath(depart, dest);
+        if(!apath.isEmpty()){
+            return Topology.getInstance().getPath(depart, dest).get(0);
+        }
+        return null;      
+    }
+    
     @Override
     public void run() {
         while (true) {
             try {                
                 EventPacket packet = inputQueue.take();                
-                if (packet.getPath().isEmpty() || packet.getDestination() == this) { // then, the packet arrived at destination. We can process it here.
+                if (/*packet.getPath() == null ||*/ packet.getDestination().contains(this)) { // then, the packet arrived at destination. We can process it here.
                     process(packet);
+                    packet.getDestination().remove(this);
+                    if(!packet.getDestination().isEmpty()) {
+                        forwardEventPacket(packet);
+                    }
                 } else { // then, the packet is just passing. Forward it!
                     forwardEventPacket(packet);
                 }                
@@ -173,8 +212,9 @@ public class Device extends Thread implements Serializable {
      * @param packet
      * @param dest
      */
-    protected void sendPacket(EventPacket packet, Device dest) {
+    protected void sendPacket(EventPacket packet, Collection<Device> dest) {
         // set the destination of this packet.
+        packet.setSource(this);
         packet.setDestination(dest);
         forwardEventPacket(packet);
     }
@@ -189,11 +229,11 @@ public class Device extends Thread implements Serializable {
         for (Device dest : Topic2Device.getInstance().getTopic2device().get(topic)) {
             if (dest == this) {
                 pubSubService.publish(event, topic);
-                continue;
+                
             }
             EventPacket packet = new EventPacket(this, event, topic);
             packet.setColor(packetColor);
-            sendPacket(packet, dest);
+            sendPacket(packet, Topic2Device.getInstance().getTopic2device().get(topic));
         }
     }
 

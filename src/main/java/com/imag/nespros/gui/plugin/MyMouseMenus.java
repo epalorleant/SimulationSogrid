@@ -44,6 +44,7 @@ public class MyMouseMenus {
             this.addSeparator();
             this.add(new SizeDisplay());
             this.add(new LatencyDisplay());
+            this.add(new StdDevDisplay());
             this.add(new BandwidthDisplay());
             this.add(new LossRateDisplay());
             this.addSeparator();
@@ -128,6 +129,12 @@ public class MyMouseMenus {
 
         public void setEdgeAndView(ComLink e, VisualizationViewer visComp) {
             this.setText("Bandwidth = " + e.getBandwidth());
+        }
+    }
+    public static class StdDevDisplay extends JMenuItem implements EdgeMenuListener<ComLink> {
+
+        public void setEdgeAndView(ComLink e, VisualizationViewer visComp) {
+            this.setText("Std deviation = " + e.getDev());
         }
     }
 

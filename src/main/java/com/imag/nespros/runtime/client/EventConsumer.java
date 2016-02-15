@@ -44,6 +44,8 @@ public class EventConsumer extends EPUnit implements Subscriber {
         EventBean[] evts = (EventBean[]) event;
         for (EventBean evt : evts) {
             evt.getHeader().setReceptionTime(System.currentTimeMillis());
+            if(evt.payload.contains("#time#")) evt.payload.remove("#time#");
+            if(evt.payload.contains("processTime")) evt.payload.remove("processTime");
         }
         _handler.notify(evts);
     }
@@ -72,23 +74,7 @@ public class EventConsumer extends EPUnit implements Subscriber {
     @Override
     public void run() {
     }
-    
-
-//    @Override
-//    public void process(EventBean[] evts) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-
- 
-    /*
-    @Override
-    public void setDevice(Device device) {
-        super.setDevice(device); 
-        if (_handler != null && device != null) {
-                this.getDevice().getPubSubService().subscribe(this, _input);
-            }
-    }
-*/
+  
     @Override
     public boolean openIOchannels() {        
         Topic2Device.getInstance().AddMapping(_input, getDevice());

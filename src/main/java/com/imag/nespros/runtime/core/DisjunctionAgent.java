@@ -70,6 +70,7 @@ public class DisjunctionAgent extends EPUnit {
                 Values[0] = select;
             }
         }
+        
         lValues = new ArrayList<>();
         rValues = new ArrayList<>();
 
@@ -82,8 +83,8 @@ public class DisjunctionAgent extends EPUnit {
             e.payload.remove("flag");
         }
         EventBean[] lV, rV;
-            lV = (EventBean[]) lValues.toArray();
-            rV = (EventBean[]) rValues.toArray();
+            lV = (EventBean[]) lValues.toArray(new EventBean[0]);
+            rV = (EventBean[]) rValues.toArray(new EventBean[0]);
         if (!lValues.isEmpty() && !rValues.isEmpty()) {
             
             // many event instances can match... the selection mode should clearly define the event to select
@@ -181,17 +182,17 @@ public class DisjunctionAgent extends EPUnit {
                     case SelectionMode.MODE_CONTINUOUS: {
                         for (EventBean l : lValues) {
 
-                            EventBean ec = new EventBean();
-                            ec.getHeader().setDetectionTime(l.getHeader().getDetectionTime());
-                            ec.getHeader().setPriority(l.getHeader().getPriority());
-                            ec.getHeader().setIsComposite(true);
-                            ec.getHeader().setProductionTime(System.currentTimeMillis());
-                            ec.getHeader().setProducerID(this.getName());
-                            ec.getHeader().setTypeIdentifier("Disjunction");
-                            ec.payload.put("l", l);
-                            ec.payload.put("ttl", TTL);
-                            ec.payload.put("processTime", ntime);
-                            _outputQueue.put(ec);
+                            //EventBean ec = new EventBean();
+                            //ec.getHeader().setDetectionTime(l.getHeader().getDetectionTime());
+                            //ec.getHeader().setPriority(l.getHeader().getPriority());
+                            l.getHeader().setIsComposite(true);
+                            l.getHeader().setProductionTime(System.currentTimeMillis());
+                            //ec.getHeader().setProducerID(this.getName());
+                            l.getHeader().setTypeIdentifier("Disjunction");
+                            //ec.payload.put("l", l);
+                            l.payload.put("ttl", TTL);
+                            l.payload.put("processTime", ntime);
+                            _outputQueue.put(l);
                             numEventProduced++;
                             getExecutorService().execute(getOutputNotifier());
                         }
@@ -200,17 +201,17 @@ public class DisjunctionAgent extends EPUnit {
                     case SelectionMode.MODE_CHRONOLOGIC: {
 
                         Arrays.sort(lV, 0, lV.length - 1, new EventComparator2());
-                        EventBean ec = new EventBean();
-                        ec.getHeader().setDetectionTime(lV[0].getHeader().getDetectionTime());
-                        ec.getHeader().setPriority(lV[0].getHeader().getPriority());
-                        ec.getHeader().setIsComposite(true);
-                        ec.getHeader().setProductionTime(System.currentTimeMillis());
-                        ec.getHeader().setProducerID(this.getName());
-                        ec.getHeader().setTypeIdentifier("Disjunction");
-                        ec.payload.put("l", lV[0]);
-                        ec.payload.put("ttl", TTL);
-                        ec.payload.put("processTime", ntime);
-                        _outputQueue.put(ec);
+                        //EventBean ec = new EventBean();
+                        //ec.getHeader().setDetectionTime(lV[0].getHeader().getDetectionTime());
+                        //ec.getHeader().setPriority(lV[0].getHeader().getPriority());
+                        lV[0].getHeader().setIsComposite(true);
+                        lV[0].getHeader().setProductionTime(System.currentTimeMillis());
+                        //ec.getHeader().setProducerID(this.getName());
+                        lV[0].getHeader().setTypeIdentifier("Disjunction");
+                        //ec.payload.put("l", lV[0]);
+                        lV[0].payload.put("ttl", TTL);
+                        lV[0].payload.put("processTime", ntime);
+                        _outputQueue.put(lV[0]);
                         numEventProduced++;
                         getExecutorService().execute(getOutputNotifier());
                     }
@@ -218,17 +219,17 @@ public class DisjunctionAgent extends EPUnit {
 
                     case SelectionMode.MODE_PRIORITY: {
 
-                        EventBean ec = new EventBean();
-                        ec.getHeader().setDetectionTime(lV[0].getHeader().getDetectionTime());
-                        ec.getHeader().setPriority(lV[0].getHeader().getPriority());
-                        ec.getHeader().setIsComposite(true);
-                        ec.getHeader().setProductionTime(System.currentTimeMillis());
-                        ec.getHeader().setProducerID(this.getName());
-                        ec.getHeader().setTypeIdentifier("Disjunction");
-                        ec.payload.put("l", lV[0]);
-                        ec.payload.put("ttl", TTL);
-                        ec.payload.put("processTime", ntime);
-                        _outputQueue.put(ec);
+                        //EventBean ec = new EventBean();
+                        //ec.getHeader().setDetectionTime(lV[0].getHeader().getDetectionTime());
+                        //ec.getHeader().setPriority(lV[0].getHeader().getPriority());
+                        lV[0].getHeader().setIsComposite(true);
+                        lV[0].getHeader().setProductionTime(System.currentTimeMillis());
+                        //ec.getHeader().setProducerID(this.getName());
+                        lV[0].getHeader().setTypeIdentifier("Disjunction");
+                        //ec.payload.put("l", lV[0]);
+                        lV[0].payload.put("ttl", TTL);
+                        lV[0].payload.put("processTime", ntime);
+                        _outputQueue.put(lV[0]);
                         numEventProduced++;
                         getExecutorService().execute(getOutputNotifier());
                     }
@@ -237,17 +238,17 @@ public class DisjunctionAgent extends EPUnit {
                     default: { /// mode recent
 
                         Arrays.sort(lV, 0, lV.length - 1, new EventComparator2());
-                        EventBean ec = new EventBean();
-                        ec.getHeader().setDetectionTime(lV[lV.length - 1].getHeader().getDetectionTime());
-                        ec.getHeader().setPriority(lV[lV.length - 1].getHeader().getPriority());
-                        ec.getHeader().setIsComposite(true);
-                        ec.getHeader().setProductionTime(System.currentTimeMillis());
-                        ec.getHeader().setProducerID(this.getName());
-                        ec.getHeader().setTypeIdentifier("Disjunction");
-                        ec.payload.put("l", lV[lV.length - 1]);
-                        ec.payload.put("ttl", TTL);
-                        ec.payload.put("processTime", ntime);
-                        _outputQueue.put(ec);
+                        //EventBean ec = new EventBean();
+                        //ec.getHeader().setDetectionTime(lV[lV.length - 1].getHeader().getDetectionTime());
+                        //ec.getHeader().setPriority(lV[lV.length - 1].getHeader().getPriority());
+                        lV[lV.length - 1].getHeader().setIsComposite(true);
+                        lV[lV.length - 1].getHeader().setProductionTime(System.currentTimeMillis());
+                        //ec.getHeader().setProducerID(this.getName());
+                        lV[lV.length - 1].getHeader().setTypeIdentifier("Disjunction");
+                        //lV[lV.length - 1].payload.put("l", lV[lV.length - 1]);
+                        lV[lV.length - 1].payload.put("ttl", TTL);
+                        lV[lV.length - 1].payload.put("processTime", ntime);
+                        _outputQueue.put(lV[lV.length - 1]);
                         numEventProduced++;
                         getExecutorService().execute(getOutputNotifier());
                     }
@@ -263,17 +264,17 @@ public class DisjunctionAgent extends EPUnit {
                     case SelectionMode.MODE_CONTINUOUS: {
                         for (EventBean r : rValues) {
 
-                            EventBean ec = new EventBean();
-                            ec.getHeader().setDetectionTime(r.getHeader().getDetectionTime());
-                            ec.getHeader().setPriority(r.getHeader().getPriority());
-                            ec.getHeader().setIsComposite(true);
-                            ec.getHeader().setProductionTime(System.currentTimeMillis());
-                            ec.getHeader().setProducerID(this.getName());
-                            ec.getHeader().setTypeIdentifier("Disjunction");
-                            ec.payload.put("r", r);
-                            ec.payload.put("ttl", TTL);
-                            ec.payload.put("processTime", ntime);
-                            _outputQueue.put(ec);
+                            //EventBean ec = new EventBean();
+                            //ec.getHeader().setDetectionTime(r.getHeader().getDetectionTime());
+                            //ec.getHeader().setPriority(r.getHeader().getPriority());
+                            r.getHeader().setIsComposite(true);
+                            r.getHeader().setProductionTime(System.currentTimeMillis());
+                            //ec.getHeader().setProducerID(this.getName());
+                            r.getHeader().setTypeIdentifier("Disjunction");
+                            //ec.payload.put("r", r);
+                            r.payload.put("ttl", TTL);
+                            r.payload.put("processTime", ntime);
+                            _outputQueue.put(r);
                             numEventProduced++;
                             getExecutorService().execute(getOutputNotifier());
                         }
@@ -282,17 +283,17 @@ public class DisjunctionAgent extends EPUnit {
                     case SelectionMode.MODE_CHRONOLOGIC: {
 
                         Arrays.sort(rV, 0, rV.length - 1, new EventComparator2());
-                        EventBean ec = new EventBean();
-                        ec.getHeader().setDetectionTime(rV[0].getHeader().getDetectionTime());
-                        ec.getHeader().setPriority(rV[0].getHeader().getPriority());
-                        ec.getHeader().setIsComposite(true);
-                        ec.getHeader().setProductionTime(System.currentTimeMillis());
-                        ec.getHeader().setProducerID(this.getName());
-                        ec.getHeader().setTypeIdentifier("Disjunction");
-                        ec.payload.put("r", rV[0]);
-                        ec.payload.put("ttl", TTL);
-                        ec.payload.put("processTime", ntime);
-                        _outputQueue.put(ec);
+                        //EventBean ec = new EventBean();
+                        //ec.getHeader().setDetectionTime(rV[0].getHeader().getDetectionTime());
+                        //ec.getHeader().setPriority(rV[0].getHeader().getPriority());
+                        rV[0].getHeader().setIsComposite(true);
+                        rV[0].getHeader().setProductionTime(System.currentTimeMillis());
+                        //ec.getHeader().setProducerID(this.getName());
+                        rV[0].getHeader().setTypeIdentifier("Disjunction");
+                        //ec.payload.put("r", rV[0]);
+                        rV[0].payload.put("ttl", TTL);
+                        rV[0].payload.put("processTime", ntime);
+                        _outputQueue.put(rV[0]);
                         numEventProduced++;
                         getExecutorService().execute(getOutputNotifier());
                     }
@@ -300,17 +301,17 @@ public class DisjunctionAgent extends EPUnit {
 
                     case SelectionMode.MODE_PRIORITY: {
 
-                        EventBean ec = new EventBean();
-                        ec.getHeader().setDetectionTime(rV[0].getHeader().getDetectionTime());
-                        ec.getHeader().setPriority(rV[0].getHeader().getPriority());
-                        ec.getHeader().setIsComposite(true);
-                        ec.getHeader().setProductionTime(System.currentTimeMillis());
-                        ec.getHeader().setProducerID(this.getName());
-                        ec.getHeader().setTypeIdentifier("Disjunction");
-                        ec.payload.put("r", rV[0]);
-                        ec.payload.put("ttl", TTL);
-                        ec.payload.put("processTime", ntime);
-                        _outputQueue.put(ec);
+                        //EventBean ec = new EventBean();
+                        //ec.getHeader().setDetectionTime(rV[0].getHeader().getDetectionTime());
+                        //ec.getHeader().setPriority(rV[0].getHeader().getPriority());
+                        rV[0].getHeader().setIsComposite(true);
+                        rV[0].getHeader().setProductionTime(System.currentTimeMillis());
+                        //ec.getHeader().setProducerID(this.getName());
+                        rV[0].getHeader().setTypeIdentifier("Disjunction");
+                        //ec.payload.put("r", rV[0]);
+                        rV[0].payload.put("ttl", TTL);
+                        rV[0].payload.put("processTime", ntime);
+                        _outputQueue.put(rV[0]);
                         numEventProduced++;
                         getExecutorService().execute(getOutputNotifier());
                     }
@@ -319,17 +320,17 @@ public class DisjunctionAgent extends EPUnit {
                     default: { /// mode recent
 
                         Arrays.sort(rV, 0, rV.length - 1, new EventComparator2());
-                        EventBean ec = new EventBean();
-                        ec.getHeader().setDetectionTime(rV[rV.length - 1].getHeader().getDetectionTime());
-                        ec.getHeader().setPriority(rV[rV.length - 1].getHeader().getPriority());
-                        ec.getHeader().setIsComposite(true);
-                        ec.getHeader().setProductionTime(System.currentTimeMillis());
-                        ec.getHeader().setProducerID(this.getName());
-                        ec.getHeader().setTypeIdentifier("Disjunction");
-                        ec.payload.put("r", rV[rV.length - 1]);
-                        ec.payload.put("ttl", TTL);
-                        ec.payload.put("processTime", ntime);
-                        _outputQueue.put(ec);
+                        //EventBean ec = new EventBean();
+                        //ec.getHeader().setDetectionTime(rV[rV.length - 1].getHeader().getDetectionTime());
+                        //ec.getHeader().setPriority(rV[rV.length - 1].getHeader().getPriority());
+                        rV[rV.length - 1].getHeader().setIsComposite(true);
+                        rV[rV.length - 1].getHeader().setProductionTime(System.currentTimeMillis());
+                        //ec.getHeader().setProducerID(this.getName());
+                        rV[rV.length - 1].getHeader().setTypeIdentifier("Disjunction");
+                        //ec.payload.put("r", rV[rV.length - 1]);
+                        rV[rV.length - 1].payload.put("ttl", TTL);
+                        rV[rV.length - 1].payload.put("processTime", ntime);
+                        _outputQueue.put(rV[rV.length - 1]);
                         numEventProduced++;
                         getExecutorService().execute(getOutputNotifier());
                     }

@@ -7,6 +7,7 @@ package com.imag.nespros.network.routing;
 
 import com.imag.nespros.runtime.core.EPUnit;
 import com.imag.nespros.runtime.core.EventChannel;
+import com.imag.nespros.runtime.core.IOTerminal;
 import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import java.util.List;
 
@@ -50,10 +51,12 @@ public class EPGraph {
         for (EPUnit op : operators) {
             if (op.getOutputTerminal() != null) {
                 for (EPUnit opDest : operators) {
-                    for (String inputTopic : opDest.getInputTopics()) {
+                    for (IOTerminal inputTerm : opDest.getInputTerminals()) {
+                        String inputTopic = inputTerm.getTopic();
+                        //System.out.println(inputTopic);
                         if (inputTopic.equals(op.getOutputTopic())) {
                             EventChannel ec = new EventChannel(inputTopic);
-                            graph.addEdge(ec, op, opDest);
+                            graph.addEdge(ec, op, opDest);                              
                         }
                     }
                 }

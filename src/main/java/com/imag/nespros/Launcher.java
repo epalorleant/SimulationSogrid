@@ -11,6 +11,9 @@ import com.imag.nespros.network.routing.EPGraph;
 import com.imag.nespros.runtime.client.EventConsumer;
 import com.imag.nespros.runtime.core.AggregatorAgent;
 import com.imag.nespros.runtime.core.Avg;
+import com.imag.nespros.runtime.core.BatchNWindow;
+import com.imag.nespros.runtime.core.ConjunctionAgent;
+import com.imag.nespros.runtime.core.DisjunctionAgent;
 import com.imag.nespros.runtime.core.EPUnit;
 import com.imag.nespros.runtime.core.FilterAgent;
 import com.imag.nespros.runtime.core.GreatherOrEqualFilter;
@@ -50,19 +53,35 @@ public class Launcher {
             duration = Integer.parseInt(args[2]);
         }
         
-        EventConsumer utility = new EventConsumer("Utility","Aggregated", new Consumer());
+        EventConsumer utility = new EventConsumer("Utility","Result", new Consumer());
         operators.add(utility);        
         FilterAgent filter = new FilterAgent("FilterA","MeterEvent", "Filtered");
         filter.addFilter(new GreatherOrEqualFilter("realPowerWatts", 1d));
-        AggregatorAgent aggregate = new AggregatorAgent("AVG_PWR", "Filtered", "Aggregated");
-        aggregate.setWindowHandler(new TimeBatchWindow(10, TimeUnit.SECONDS));
-        aggregate.addAggregator(new Avg("realPowerWatts", "avgPwr"));
         filter.setExecutionTime(1);
         filter.setUsedMemory(10);
+        
+        AggregatorAgent aggregate = new AggregatorAgent("AVG_PWR", "Filtered", "Aggregated");
+        aggregate.setWindowHandler(new TimeBatchWindow(10, TimeUnit.SECONDS));
+        aggregate.addAggregator(new Avg("realPowerWatts", "avgPwr"));        
         aggregate.setExecutionTime(1000);
         aggregate.setUsedMemory(50);
+        
+        FilterAgent filterB = new FilterAgent("FilterB","Filtered", "FilteredB");
+        filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
+        filterB.setExecutionTime(1);
+        filterB.setUsedMemory(10);
+        
+        DisjunctionAgent orAgent = new DisjunctionAgent("OR", "FilteredB", "Aggregated", "Result");
+        orAgent.setExecutionTime(1);
+        orAgent.setUsedMemory(15);
+        //orAgent.setWindowHandler(new TimeBatchWindow(5, TimeUnit.SECONDS));
+        
+        
+         operators.add(orAgent);
+         operators.add(filterB);        
         operators.add(aggregate);
-         operators.add(filter);
+        operators.add(filter);
+       
          ResourceLoader r = new ResourceLoader();
         //File folder = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());//r.getRessource(path);
         String[] listOfFiles = r.listFiles(path); 

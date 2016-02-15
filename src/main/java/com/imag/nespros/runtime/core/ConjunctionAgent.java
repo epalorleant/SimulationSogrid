@@ -85,8 +85,8 @@ public class ConjunctionAgent extends EPUnit {
             e.payload.remove("flag");
         }
         EventBean[] lV, rV;
-            lV = (EventBean[]) lValues.toArray();
-            rV = (EventBean[]) rValues.toArray();
+            lV = (EventBean[]) lValues.toArray(new EventBean[0]);
+            rV = (EventBean[]) rValues.toArray(new EventBean[0]);
         
         if (!lValues.isEmpty() && !rValues.isEmpty()) {
 

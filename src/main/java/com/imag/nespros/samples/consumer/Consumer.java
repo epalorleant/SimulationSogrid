@@ -34,8 +34,13 @@ public class Consumer implements AnEventHandler {
             //long notificationTime = evt.getHeader().getReceptionTime()- evt.getHeader().getNotificationTime();
             //logger.log(timeSinceProd + ", "+ notificationTime);
             //System.out.println(MemoryMeasurer.measureBytes(evt)+" bytes");
-            // System.out.println(evt.getValue("avgPwr")+", " +evt.getValue("meterID"));//+", "+evt.getHeader().getPriority());  
+            // System.out.println(evt.getValue("avgPwr")+", " +evt.getValue("meterID"));//+", "+evt.getHeader().getPriority());
+            if(evt.payload.contains("avgPwr")){
              System.out.println("Average Pwr: "+ evt.getValue("avgPwr"));//+", " +evt.getValue("meterID"));
+            }
+            else{
+                System.out.println(evt.payload);
+            }
         }
     }
 

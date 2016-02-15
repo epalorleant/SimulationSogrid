@@ -31,6 +31,7 @@ public class ComLink extends Thread {
     private int bandwidth;
     private LinkedBlockingQueue<EventPacket> pendingPackets;
     private double lossRate;
+    private double dev;
     //private int packetlost;
 
     // for display control
@@ -56,7 +57,9 @@ public class ComLink extends Thread {
         logger = new MyLogger("Latencies_" + ID);
 
         //delay = new Sim_normal_obj("Latency", latency, var);
-        normalDist = new Normal(0, 1, RandomEngine.makeDefault());
+        latency = 10;
+        dev = Math.sqrt(latency);
+        normalDist = new Normal(latency, dev, RandomEngine.makeDefault());
         lossRate = 0.05;
         bernoulliDist = new Binomial(1, lossRate, RandomEngine.makeDefault());
     }
@@ -77,7 +80,7 @@ public class ComLink extends Thread {
 
     public void setLatency(int latency) {
         this.latency = latency;
-        normalDist.setState(latency, Math.sqrt(latency));
+        normalDist.setState(latency, dev);
     }
 
     public String getID() {
@@ -126,6 +129,15 @@ public class ComLink extends Thread {
         bernoulliDist.setNandP(1, lossRate);
     }
 
+    public double getDev() {
+        return dev;
+    }
+
+    public void setDev(double dev) {
+        this.dev = dev;
+        normalDist.setState(latency, dev);
+    }
+
 
     /*
      public Sim_port getOutputPort1() {
@@ -146,7 +158,7 @@ public class ComLink extends Thread {
     }
 
     protected boolean send(EventPacket packet) {
-
+        packet.setInputLink(this);
         int overhead = 0, tried = 1;
         while (bernoulliDist.nextInt() == 1) {
             overhead += latency;
