@@ -11,6 +11,8 @@ import com.imag.nespros.network.routing.PubSubService;
 import com.imag.nespros.network.routing.Topic2Device;
 import com.imag.nespros.network.routing.Topology;
 import com.imag.nespros.runtime.core.EPUnit;
+import com.imag.nespros.runtime.event.EventBean;
+import com.imag.nespros.samples.producer.MeterSimulator;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -191,7 +193,22 @@ public class Device extends Thread implements Serializable {
     }
 
     protected void process(EventPacket packet) {
-        pubSubService.publish(packet.getEvent(), packet.getTopic());
+        pubSubService.publish(packet.getData(), packet.getTopic());
+        for(EPUnit epu: operators){
+            if(epu instanceof MeterSimulator){
+                EventBean  e = (EventBean) packet.getData();
+                long t1, t2, t3, t4;
+                t3 = (long)e.getValue("TT");
+                t2 = (long)e.getValue("RT");
+                t1 = (long)e.getValue("OT");
+                t4= System.currentTimeMillis();
+                double delta = ((t4-t1) - (t3-t2))/2;
+                double theta = ((t2+t3) - (t1+t4))/2;
+                System.out.println("Temps A/R delta = "+delta+ "\n ecart horloge theta= "+theta);            
+        }
+        }
+           
+        
     }
 
     public PubSubService getPubSubService() {
@@ -212,7 +229,7 @@ public class Device extends Thread implements Serializable {
      * @param packet
      * @param dest
      */
-    protected void sendPacket(EventPacket packet, Collection<Device> dest) {
+    public void sendPacket(EventPacket packet, Collection<Device> dest) {
         // set the destination of this packet.
         packet.setSource(this);
         packet.setDestination(dest);

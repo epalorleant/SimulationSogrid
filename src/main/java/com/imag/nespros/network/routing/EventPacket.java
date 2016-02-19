@@ -23,27 +23,27 @@ public class EventPacket implements Serializable{
     private ArrayList<Device> destination;
     private ComLink path;
     private ComLink inputLink;
-    private Object event;
+    private Object data;
     private String topic;
     private Color color = Color.BLUE;
     
     public EventPacket(Object event) {
         this.destination = new ArrayList<Device>();
-        this.event = event;
+        this.data = event;
         path = null;
     }
 
     public EventPacket(Device origin, Object event) {
         this.destination = new ArrayList<Device>();
         this.origin = origin;
-        this.event = event;
+        this.data = event;
         path = null;
     }
 
     public EventPacket(Device origin, Object event, String topic) {
         this.destination = new ArrayList<Device>();
         this.origin = origin;
-        this.event = event;
+        this.data = event;
         this.topic = topic;
         path = null;
     }
@@ -56,12 +56,12 @@ public class EventPacket implements Serializable{
         this.origin = origin;
     }
 
-    public Object getEvent() {
-        return event;
+    public Object getData() {
+        return data;
     }
 
-    public void setEvent(Object event) {
-        this.event = event;
+    public void setData(Object data) {
+        this.data = data;
     }
 
     public ComLink getPath() {
@@ -116,7 +116,7 @@ public class EventPacket implements Serializable{
         this.color = color;
     }
     public EventPacket clone(){
-        EventPacket ep = new EventPacket(origin, event, topic);
+        EventPacket ep = new EventPacket(origin, data, topic);
         ep.path = path;
         ep.color = color;
         //ep.destination = destination;

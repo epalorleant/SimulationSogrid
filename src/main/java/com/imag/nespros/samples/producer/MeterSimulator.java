@@ -53,81 +53,93 @@ public class MeterSimulator extends EventProducer {
 
     @Override
     public void run() {
-        boolean isSimulating = false;
-        //System.out.println("generating events...");
-        int i = 1;
         try {
-            Thread.sleep(delay);
-            while (!stop) {
-                if (!isSimulating) {
-                    EventBean evt = loader.getNext(); // get the next event if possible
-                    if (evt != null) {
-                        //System.out.println(ObjectGraphMeasurer.measure(evt));
-                        //EventBean e = producer.createEventWithPayload(evt);
-                        //evt.getHeader().setPriority((short) random.nextInt(5));
-                        evt.getHeader().setPriority((short)1);
-                        evt.getHeader().setDetectionTime(System.currentTimeMillis());
-                        sendEvent(evt);
-                        System.out.println(" next event generated... (N° " + i + "): " + evt.payload);
-                        i++;
-                        double value = Double.parseDouble(evt.getValue(attribute).toString());
-                        realValues.add(evt);
-                        SOMME += value;
-                        Thread.sleep(delay);
-                    } else {
-                        isSimulating = true;
-                        double moyenne = SOMME / realValues.size();
-                        // calcul de l'ecart type entre les valeurs observées
-                        double var = 0;
-                        for (EventBean e : realValues) {
-                            double val = Double.parseDouble(e.getValue(attribute).toString());
-                            var += Math.pow(val - moyenne, 2);
-                        }
-                        var = var / realValues.size();
-                        ECART_TYPE = Math.sqrt(var);
-                        System.out.println("sigma = " + ECART_TYPE);
-                    }
-
-                } else {
-                    passage++;
-                    System.out.println("Start Simulation N°" + passage + "...");
-                    for (EventBean evt : realValues) {
-                        // EventBean evt = e.copy();
-                        double value = Double.parseDouble(evt.getValue(attribute).toString());
-                        // valeur à ajouter ou retrancher
-                        double eps = random.nextGaussian() * (ECART_TYPE / 2);
-                        // ajouter ou retrancher?
-                        if (random.nextBoolean()) { // ajouter
-                            value += eps;
-                        } else {  // retrancher
-                            value -= eps;
-                            if (value < 0) {
-                                value += eps;
-                            }
-                        }
-                        evt.payload.put(attribute, value);
-//                        try {
-//                            long timestamp = Long.parseLong(BeanUtils.getProperty(evt, "timestampUTC"));
-//                            timestamp += 86400 * passage;
-//                            BeanUtils.setProperty(evt, "timestampUTC", timestamp);
-//                        } catch (NoSuchMethodException ex) {
+            boolean isSimulating = false;
+            //System.out.println("generating events...");
+            int i = 1;
+            EventBean e = new EventBean();
+            e.payload.put("sender", this.getDevice());
+            e.payload.put("TT", System.currentTimeMillis());
+            sendEvent(e);
 //
+//        try {
+//            Thread.sleep(delay);
+//
+//            
+//            while (!stop) {
+//                if (!isSimulating) {
+//                    EventBean evt = loader.getNext(); // get the next event if possible
+//                    if (evt != null) {                        
+//                        evt.getHeader().setPriority((short)1);
+//                        evt.getHeader().setDetectionTime(System.currentTimeMillis());
+//                        evt.payload.put("sender", this.getDevice());
+//                        evt.payload.put("TT", System.currentTimeMillis());
+//                        sendEvent(evt);
+//                        System.out.println(" next event generated... (N° " + i + "): " + evt.payload);
+//                        i++;
+//                        double value = Double.parseDouble(evt.getValue(attribute).toString());
+//                        realValues.add(evt);
+//                        SOMME += value;
+//                        Thread.sleep(delay);
+//                    } else {
+//                        isSimulating = true;
+//                        double moyenne = SOMME / realValues.size();
+//                        // calcul de l'ecart type entre les valeurs observées
+//                        double var = 0;
+//                        for (EventBean e : realValues) {
+//                            double val = Double.parseDouble(e.getValue(attribute).toString());
+//                            var += Math.pow(val - moyenne, 2);
 //                        }
-                        System.out.println(evt.payload);
-                        i++;
-                        //EventBean e = producer.createEventWithPayload(evt);
-                        evt.getHeader().setPriority((short) random.nextInt(5));
-                        evt.getHeader().setDetectionTime(System.currentTimeMillis());
-                        sendEvent(evt);
-                        Thread.sleep(delay);
-                    }
-                    System.out.println("End Simulation N°" + passage + "...");
-
-                }
-            }
-
-        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NumberFormatException | InterruptedException ex) {
-            ex.printStackTrace();
+//                        var = var / realValues.size();
+//                        ECART_TYPE = Math.sqrt(var);
+//                        System.out.println("sigma = " + ECART_TYPE);
+//                    }
+//
+//                } else {
+//                    passage++;
+//                    System.out.println("Start Simulation N°" + passage + "...");
+//                    for (EventBean evt : realValues) {
+//                        // EventBean evt = e.copy();
+//                        double value = Double.parseDouble(evt.getValue(attribute).toString());
+//                        // valeur à ajouter ou retrancher
+//                        double eps = random.nextGaussian() * (ECART_TYPE / 2);
+//                        // ajouter ou retrancher?
+//                        if (random.nextBoolean()) { // ajouter
+//                            value += eps;
+//                        } else {  // retrancher
+//                            value -= eps;
+//                            if (value < 0) {
+//                                value += eps;
+//                            }
+//                        }
+//                        evt.payload.put(attribute, value);
+////                        try {
+////                            long timestamp = Long.parseLong(BeanUtils.getProperty(evt, "timestampUTC"));
+////                            timestamp += 86400 * passage;
+////                            BeanUtils.setProperty(evt, "timestampUTC", timestamp);
+////                        } catch (NoSuchMethodException ex) {
+////
+////                        }
+//                        System.out.println(evt.payload);
+//                        i++;
+//                        //EventBean e = producer.createEventWithPayload(evt);
+//                        evt.getHeader().setPriority((short) random.nextInt(5));
+//                        evt.getHeader().setDetectionTime(System.currentTimeMillis());                        
+//                        evt.payload.put("sender", this.getDevice());
+//                        evt.payload.put("TT", System.currentTimeMillis());
+//                        sendEvent(evt);
+//                        Thread.sleep(delay);
+//                    }
+//                    System.out.println("End Simulation N°" + passage + "...");
+//
+//                }
+//            }
+//
+//        } catch (IOException | ClassNotFoundException | InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | NumberFormatException | InterruptedException ex) {
+//            ex.printStackTrace();
+//        } catch (Exception ex) {
+//            Logger.getLogger(MeterSimulator.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         } catch (Exception ex) {
             Logger.getLogger(MeterSimulator.class.getName()).log(Level.SEVERE, null, ex);
         }

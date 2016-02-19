@@ -53,34 +53,37 @@ public class Launcher {
             duration = Integer.parseInt(args[2]);
         }
         
-        EventConsumer utility = new EventConsumer("Utility","Result", new Consumer());
+        EventConsumer utility = new EventConsumer("Utility","NTP_Event");
+        
+        Consumer c =new Consumer(utility);
+        utility.setHAndler(c);
         operators.add(utility);        
-        FilterAgent filter = new FilterAgent("FilterA","MeterEvent", "Filtered");
-        filter.addFilter(new GreatherOrEqualFilter("realPowerWatts", 1d));
-        filter.setExecutionTime(1);
-        filter.setUsedMemory(10);
+        //FilterAgent filter = new FilterAgent("FilterA","MeterEvent", "Filtered");
+        //filter.addFilter(new GreatherOrEqualFilter("realPowerWatts", 1d));
+        //filter.setExecutionTime(1);
+        //filter.setUsedMemory(10);
         
-        AggregatorAgent aggregate = new AggregatorAgent("AVG_PWR", "Filtered", "Aggregated");
-        aggregate.setWindowHandler(new TimeBatchWindow(10, TimeUnit.SECONDS));
-        aggregate.addAggregator(new Avg("realPowerWatts", "avgPwr"));        
-        aggregate.setExecutionTime(1000);
-        aggregate.setUsedMemory(50);
+        //AggregatorAgent aggregate = new AggregatorAgent("AVG_PWR", "Filtered", "Aggregated");
+        //aggregate.setWindowHandler(new TimeBatchWindow(10, TimeUnit.SECONDS));
+        //aggregate.addAggregator(new Avg("realPowerWatts", "avgPwr"));        
+        //aggregate.setExecutionTime(1000);
+        //aggregate.setUsedMemory(50);
         
-        FilterAgent filterB = new FilterAgent("FilterB","Filtered", "FilteredB");
-        filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
-        filterB.setExecutionTime(1);
-        filterB.setUsedMemory(10);
+        //FilterAgent filterB = new FilterAgent("FilterB","Filtered", "FilteredB");
+        //filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
+        //filterB.setExecutionTime(1);
+        //filterB.setUsedMemory(10);
         
-        DisjunctionAgent orAgent = new DisjunctionAgent("OR", "FilteredB", "Aggregated", "Result");
-        orAgent.setExecutionTime(1);
-        orAgent.setUsedMemory(15);
+        //DisjunctionAgent orAgent = new DisjunctionAgent("OR", "FilteredB", "Aggregated", "Result");
+        //orAgent.setExecutionTime(1);
+        //orAgent.setUsedMemory(15);
         //orAgent.setWindowHandler(new TimeBatchWindow(5, TimeUnit.SECONDS));
         
         
-         operators.add(orAgent);
-         operators.add(filterB);        
-        operators.add(aggregate);
-        operators.add(filter);
+         //operators.add(orAgent);
+         //operators.add(filterB);        
+        //operators.add(aggregate);
+        //operators.add(filter);
        
          ResourceLoader r = new ResourceLoader();
         //File folder = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());//r.getRessource(path);
@@ -88,7 +91,7 @@ public class Launcher {
        
         for (int i = 0; i < listOfFiles.length; i++) {
             if ( i < NUMBER) {                                              
-                MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"MeterEvent", 
+                MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"NTP_Event", 
                         r.getRessource(listOfFiles[i]), meterSchema, types, delay, MeterEvent.class)
                         .simulate("realPowerWatts");
                  operators.add(simulator);                                

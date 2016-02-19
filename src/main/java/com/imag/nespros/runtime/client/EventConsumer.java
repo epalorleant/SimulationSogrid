@@ -22,6 +22,10 @@ public class EventConsumer extends EPUnit implements Subscriber {
     String _info, _input;
     AnEventHandler _handler;
 
+    public EventConsumer(String info, String IDinputTerminal){
+        this(info, IDinputTerminal, null);
+    }
+    
     public EventConsumer(String info, String IDinputTerminal, AnEventHandler handler) {
         super(info);
         _handler = handler;
@@ -39,6 +43,10 @@ public class EventConsumer extends EPUnit implements Subscriber {
       //  }
     }
 
+    public void setHAndler(AnEventHandler handler){
+        _handler = handler;
+    }
+    
     @Override
     public synchronized void notify(Object event) {
         EventBean[] evts = (EventBean[]) event;
