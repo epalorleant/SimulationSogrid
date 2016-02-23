@@ -99,6 +99,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JSlider;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.apache.commons.collections15.Transformer;
@@ -188,7 +190,12 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
      *
      */
     private GraphEditor() {
-
+        
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+            Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         // create a simple graph for the demo
         //graph = new SparseMultigraph<Number,Number>();
         graph = Topology.getInstance().getGraph();  //new UndirectedSparseGraph<Device, ComLink>();

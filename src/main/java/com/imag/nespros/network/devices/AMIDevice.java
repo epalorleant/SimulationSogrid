@@ -25,7 +25,7 @@ public class AMIDevice extends Device {
         super(name, cpuSpeed, totalMemory, DeviceType.AMI);
         try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"meter.jpeg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/meter.jpeg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
@@ -43,7 +43,7 @@ public class AMIDevice extends Device {
        // icon = new MyLayeredIcon(new ImageIcon(imageURI).getImage());
         try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"meter.jpeg"));           
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/meter.jpeg"));           
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);

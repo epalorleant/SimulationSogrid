@@ -6,13 +6,15 @@ package com.imag.nespros.runtime.client;
 
 import com.imag.nespros.runtime.event.EventBean;
 
-
-
 /**
  *
  * @author epaln
  */
-public interface AnEventHandler {
+public abstract class AnEventHandler {
+   EventConsumer consumer;
+    public abstract void notify(EventBean[] evts);
 
-    public void notify(EventBean[] evts);
+    public void setConsumer(EventConsumer c){
+    consumer = c;
+}
 }

@@ -16,7 +16,7 @@ import java.util.Calendar;
  *
  * @author epaln
  */
-public class Consumer implements AnEventHandler {
+public class Consumer extends AnEventHandler {
 
     private boolean isQoS = false;
     MyLogger logger;

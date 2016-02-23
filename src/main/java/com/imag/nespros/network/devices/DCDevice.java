@@ -29,7 +29,7 @@ public class DCDevice extends Device {
          
         try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"dc.jpeg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/dc.jpeg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
@@ -40,7 +40,7 @@ public class DCDevice extends Device {
         super(name, cpuSpeed, totalMemory, DeviceType.DC);
         try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"dc.jpeg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/dc.jpeg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);

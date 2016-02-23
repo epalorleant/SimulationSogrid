@@ -27,7 +27,7 @@ public class SacomutDevice extends Device {
         this.setDeviceName(name);
         try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"sacomut.jpg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/sacomut.jpg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
@@ -38,7 +38,7 @@ public class SacomutDevice extends Device {
         super(name, cpuSpeed, totalMemory, DeviceType.SACOMUT);
          try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"sacomut.jpg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/sacomut.jpg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);

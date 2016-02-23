@@ -28,7 +28,7 @@ public class UtilityDevice extends Device {
         this.setDeviceName(name);
         try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"utility.jpg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/utility.jpg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);
@@ -39,7 +39,7 @@ public class UtilityDevice extends Device {
         //icon= new MyLayeredIcon(new ImageIcon("icons"+File.separator+"utility.jpg").getImage());
        try {
             byte[] imageInByte;            
-            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image"+File.separator+"utility.jpg"));            
+            imageInByte = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream("image/utility.jpg"));            
             icon = new MyLayeredIcon(new ImageIcon(imageInByte).getImage());
         } catch (IOException ex) {
             Logger.getLogger(AMIDevice.class.getName()).log(Level.SEVERE, null, ex);

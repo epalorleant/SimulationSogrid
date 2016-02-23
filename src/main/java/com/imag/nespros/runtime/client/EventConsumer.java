@@ -22,9 +22,17 @@ public class EventConsumer extends EPUnit implements Subscriber {
     String _info, _input;
     AnEventHandler _handler;
 
+    public EventConsumer(String _info, String _inputTerm) {
+        super(_info);
+        this._info = _info;
+        this._input = _inputTerm;
+        _type = "Consumer";
+    }
+
     public EventConsumer(String info, String IDinputTerminal, AnEventHandler handler) {
         super(info);
         _handler = handler;
+        _handler.setConsumer(this);
         this.setExecutionTime(0);
         //try {
             _info = info;
