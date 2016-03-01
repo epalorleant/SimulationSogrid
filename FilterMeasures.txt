@@ -1,0 +1,2 @@
+Operator, isProduced, Processing Time, InputQ Size, OutputQ Size 
+FilterA, True, 13380715000, 7, 0

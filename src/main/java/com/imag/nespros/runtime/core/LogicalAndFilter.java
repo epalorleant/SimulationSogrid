@@ -1,25 +1,25 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.imag.nespros.runtime.core;
+
 
 import com.google.common.collect.Lists;
 import com.imag.nespros.runtime.base.Func1;
 import com.imag.nespros.runtime.event.EventBean;
 import java.util.List;
 
+
 /**
  *
  * @author epaln
  */
-public class LogicalOrFilter implements Func1<EventBean, Boolean> {
+public class LogicalAndFilter implements Func1<EventBean, Boolean> {
 
     private List<Func1<EventBean, Boolean>> _predicates;
 
-    public LogicalOrFilter() {
+    public LogicalAndFilter() {
         _predicates = Lists.newArrayList();
     }
 
@@ -32,10 +32,10 @@ public class LogicalOrFilter implements Func1<EventBean, Boolean> {
         boolean ok = false;
         for (Func1 predicate : _predicates) {
             ok = (Boolean) predicate.invoke(param1);
-            if (ok) {
-                return true;
+            if (!ok) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }

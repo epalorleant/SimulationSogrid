@@ -70,8 +70,8 @@ public class Launcher {
         filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
         filterB.setExecutionTime(1);
         filterB.setUsedMemory(10);
-        
-        DisjunctionAgent orAgent = new DisjunctionAgent("OR", "FilteredB", "Aggregated", "Result");
+        String[] inputs = {"FilteredB", "Aggregated"};
+        DisjunctionAgent orAgent = new DisjunctionAgent("OR", inputs, "Result");
         orAgent.setExecutionTime(1);
         orAgent.setUsedMemory(15);
         //orAgent.setWindowHandler(new TimeBatchWindow(5, TimeUnit.SECONDS));

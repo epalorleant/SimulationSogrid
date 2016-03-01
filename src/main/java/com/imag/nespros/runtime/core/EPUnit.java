@@ -58,7 +58,12 @@ public abstract class EPUnit extends Thread {
     private int usedMemory;
     // operator mapoped?
     private boolean mapped;
+    public static final short MAX= 0;
+    public static final short MIN= 1;
+    public static final short AVG= 2;
+    public static final short SUM= 3;
     
+    protected short priorityFunction = 0;
     
     public EPUnit(String info) {
         super(info);
@@ -73,6 +78,14 @@ public abstract class EPUnit extends Thread {
         _handler = new BatchNWindow(1);
         _sourceStream = new DefaultObservable<>();
         mapped = false;
+    }
+
+    public short getPriorityFunction() {
+        return priorityFunction;
+    }
+
+    public void setPriorityFunction(short priorityFunction) {
+        this.priorityFunction = priorityFunction;
     }
 
     

@@ -1,0 +1,2 @@
+Operator, isProduced, Processing Time, InputQ Size, OutputQ Size 
+AVG_PWR, True, 16693000, 0, 0

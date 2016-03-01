@@ -76,11 +76,18 @@ public class AggregatorAgent extends EPUnit {
         // update the number of event processed by this EPU
         numEventProcessed += operands.length;
         short maxPriority = 0;
+        short minPriority = Short.MAX_VALUE, sumPriority=0, avgPriority =0 ;
         for (EventBean e : operands) {
+            sumPriority+= e.getHeader().getPriority();
+             if (e.getHeader().getPriority() < minPriority) {
+                minPriority = e.getHeader().getPriority();
+            }       
             if (e.getHeader().getPriority() > maxPriority) {
                 maxPriority = e.getHeader().getPriority();
             }
         }
+        avgPriority = (short) (sumPriority / operands.length);
+        
         EventBean ec = new EventBean();
         ec.getHeader().setDetectionTime(operands[0].getHeader().getDetectionTime());
         ec.getHeader().setIsComposite(true);
@@ -88,7 +95,20 @@ public class AggregatorAgent extends EPUnit {
         ec.getHeader().setProductionTime(System.currentTimeMillis());
         ec.getHeader().setTypeIdentifier("Aggregate");
         ec.payload.put("processTime", ntime);
-        ec.getHeader().setPriority(maxPriority);
+        switch (getPriorityFunction()){
+                            case EPUnit.MAX :
+                                ec.getHeader().setPriority(maxPriority);
+                                break;
+                            case EPUnit.MIN :
+                                ec.getHeader().setPriority(minPriority);
+                                break;
+                            case EPUnit.SUM:
+                                ec.getHeader().setPriority(sumPriority);
+                                break;
+                            default: //avg
+                                ec.getHeader().setPriority(avgPriority);
+                                break;
+                        }
         for (Aggregate aggregator : aggregators) {
             NameValuePair res = aggregator.aggregate(operands);
             ec.payload.put(res.getAttribute(), (Serializable) res.getValue());

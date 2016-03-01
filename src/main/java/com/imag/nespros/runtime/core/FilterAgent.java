@@ -51,6 +51,13 @@ public class FilterAgent extends EPUnit {
         this._info = info;
     }
 
+    public void setInpuTerminal(String input){
+        inputTerminal = new IOTerminal(input, "input channel " + _type, _receivers[0], this);
+    }
+    
+    public void setOutputTerminal(String output){
+        outputTerminal = new IOTerminal(output, "output channel " + _type, this);
+    }
     
     @Override
     public Collection<IOTerminal> getInputTerminals() {
@@ -93,8 +100,8 @@ public class FilterAgent extends EPUnit {
                 ntime = (long) e.getValue("processTime");
                 
                 for (Func1<EventBean, Boolean> _filter : _filters) {
-                    if (!_filter.invoke(e)) {
-                        pass_filters = false;
+                    if (_filter.invoke(e)) {
+                        pass_filters = true;
                         break;
                     }
                 }

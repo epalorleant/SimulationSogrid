@@ -1,0 +1,2 @@
+Operator, isProduced, Processing Time, InputQ Size, OutputQ Size 
+OR, True, 626000, 0, 0

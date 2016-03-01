@@ -94,7 +94,21 @@ public class FollowedByAgent extends EPUnit {
                     if (l.getHeader().getDetectionTime() < r.getHeader().getDetectionTime()) {
                         EventBean ec = new EventBean();
                         ec.getHeader().setDetectionTime(l.getHeader().getDetectionTime());
-                        ec.getHeader().setPriority((short) Math.max(l.getHeader().getPriority(), r.getHeader().getPriority()));
+                        switch (getPriorityFunction()){
+                            case EPUnit.MAX :
+                                ec.getHeader().setPriority((short) Math.max(l.getHeader().getPriority(), r.getHeader().getPriority()));
+                                break;
+                            case EPUnit.MIN :
+                                ec.getHeader().setPriority((short) Math.min(l.getHeader().getPriority(), r.getHeader().getPriority()));
+                                break;
+                            case EPUnit.SUM:
+                                ec.getHeader().setPriority((short)(l.getHeader().getPriority()+ r.getHeader().getPriority()));
+                                break;
+                            default: //avg
+                                ec.getHeader().setPriority((short) ((l.getHeader().getPriority()+ r.getHeader().getPriority())/2));
+                                break;
+                        }
+                        
                         ec.getHeader().setIsComposite(true);
                         ec.getHeader().setProductionTime(System.currentTimeMillis());
                         ec.getHeader().setProducerID(this.getName());
