@@ -172,6 +172,7 @@ public class ComLink extends Thread {
         Object lock = new Object();
         // The communication can be in both direction, compute the right direction of the packet
         int direction = getDirection(packet);
+        logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried+", "+pendingPackets.size());
         try {
             synchronized (lock) {
                 if (direction == 0) { // the default edge direction, send the event on the direct direction
@@ -184,8 +185,7 @@ public class ComLink extends Thread {
                     showMessageAnimation(direction, currentLatency, lock, packet.getColor());
                     lock.wait();
                     d.receiveEventPacket(packet);
-                }
-                logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried);
+                }                
             }
         } catch (InterruptedException ex) {
             return false;
@@ -195,7 +195,7 @@ public class ComLink extends Thread {
 
     @Override
     public void run() {
-        logger.log("Timestamp, Latency, #Try");
+        logger.log("Timestamp, Latency, #Try, #PendingPackets");
         while (true) {
             try {
                 EventPacket packet = pendingPackets.take();
