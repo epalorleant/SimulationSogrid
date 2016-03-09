@@ -1,2 +1,0 @@
-Timestamp, Latency, #Try
-1456842363462, 999, 2

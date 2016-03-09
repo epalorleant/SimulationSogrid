@@ -19,7 +19,6 @@ import java.util.Collection;
  */
 public class DisjunctionAgent extends EPUnit {
 
-    //IOTerminal inputTerminalR;
     IOTerminal[] inputTerminals;
     IOTerminal outputTerminal;
 
@@ -28,8 +27,6 @@ public class DisjunctionAgent extends EPUnit {
         this._info = info;
         this._type = "Disjunction";
         this._receivers = new TopicReceiver[IDinputTerminals.length];
-        //this._receivers[0] = new TopicReceiver(this, (short) 0);
-        //this._receivers[1] = new TopicReceiver(this, (short) 1);
         inputTerminals = new IOTerminal[IDinputTerminals.length];
         short i=0;
         for(String input: IDinputTerminals){
@@ -37,8 +34,6 @@ public class DisjunctionAgent extends EPUnit {
             inputTerminals[i]= new IOTerminal(input, "input channel "+ _type,_receivers[i], this);
             i++;            
         }
-        //inputTerminalL = new IOTerminal(IDinputTerminalL, "input channel " + _type, _receivers[0], this);
-        //inputTerminalR = new IOTerminal(IDinputTerminalR, "input channel " + _type, _receivers[1], this);
         outputTerminal = new IOTerminal(IDoutputTerminal, "output channel " + _type, this);
         _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
         logger = new MyLogger("DisjunctionMeasures");

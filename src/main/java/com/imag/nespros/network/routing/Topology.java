@@ -64,7 +64,7 @@ public class Topology {
         Transformer<ComLink, Integer> wtTransformer = new Transformer<ComLink,Integer>() {
         @Override
         public Integer transform(ComLink link) {
-            return link.getLatency();
+            return link.getLatency()*(link.getPendingPackets().size()+1);
         }
     };
         DijkstraShortestPath<Device,ComLink> alg = new DijkstraShortestPath(graph, wtTransformer);        

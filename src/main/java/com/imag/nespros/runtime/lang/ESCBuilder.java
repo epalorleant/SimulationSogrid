@@ -6,6 +6,11 @@
 package com.imag.nespros.runtime.lang;
 
 import com.imag.nespros.runtime.base.Func1;
+import com.imag.nespros.runtime.core.Aggregate;
+import com.imag.nespros.runtime.core.AggregatorAgent;
+import com.imag.nespros.runtime.core.Avg;
+import com.imag.nespros.runtime.core.BatchNWindow;
+import com.imag.nespros.runtime.core.Count;
 import com.imag.nespros.runtime.core.EPUnit;
 import com.imag.nespros.runtime.core.EqualFilter;
 import com.imag.nespros.runtime.core.FalseFilter;
@@ -16,10 +21,16 @@ import com.imag.nespros.runtime.core.LessOrEqualThanFilter;
 import com.imag.nespros.runtime.core.LessThanFilter;
 import com.imag.nespros.runtime.core.LogicalAndFilter;
 import com.imag.nespros.runtime.core.LogicalOrFilter;
+import com.imag.nespros.runtime.core.MBatchWindow;
+import com.imag.nespros.runtime.core.Max;
+import com.imag.nespros.runtime.core.Min;
 import com.imag.nespros.runtime.core.NotEqualFilter;
+import com.imag.nespros.runtime.core.SlidingWindow;
+import com.imag.nespros.runtime.core.Sum;
 import com.imag.nespros.runtime.core.TrueFilter;
 import com.imag.nespros.runtime.core.WindowHandler;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 import org.antlr.v4.runtime.tree.ParseTreeProperty;
 import org.apache.commons.collections15.map.FastHashMap;
 
@@ -264,10 +275,10 @@ class ESCBuilder extends ESCExprBaseListener {
 
     @Override
     public void exitOperator_type(ESCExprParser.Operator_typeContext ctx) {
-        if (ctx.filterdef() != null) {
-            operators.put(ctx, operators.get(ctx.filterdef()));
-            return;
-        }
+       // if (ctx.filterdef() != null) {
+       //     operators.put(ctx, operators.get(ctx.filterdef()));
+       //     return;
+       // }
         operators.put(ctx, operators.get(ctx.getChild(0)));
     }
 
@@ -282,6 +293,71 @@ class ESCBuilder extends ESCExprBaseListener {
     public void exitOperator_def(ESCExprParser.Operator_defContext ctx) {
         id2Operator.put(ctx.ID().getText(), operators.get(ctx.operator_type()));
         //operators 
+    }
+
+    @Override
+    public void exitAverage(ESCExprParser.AverageContext ctx) {
+       AggregatorAgent aggr = new AggregatorAgent("Avg");// null, null)
+        aggr.addAggregator(new Avg(ctx.ID(0).getText(), ctx.ID(1).getText()));
+        operators.put(ctx, aggr);
+    }
+
+    @Override
+    public void exitAggregate(ESCExprParser.AggregateContext ctx) {
+         operators.put(ctx, operators.get(ctx.getChild(0)));
+    }
+
+    @Override
+    public void exitMax(ESCExprParser.MaxContext ctx) {
+        AggregatorAgent aggr = new AggregatorAgent("Max");// null, null)
+        aggr.addAggregator(new Max(ctx.ID(0).getText(), ctx.ID(1).getText()));
+        operators.put(ctx, aggr);
+    }
+
+    @Override
+    public void exitMin(ESCExprParser.MinContext ctx) {
+        AggregatorAgent aggr = new AggregatorAgent("Min");// null, null)
+        aggr.addAggregator(new Min(ctx.ID(0).getText(), ctx.ID(1).getText()));
+        operators.put(ctx, aggr);
+    }
+
+    @Override
+    public void exitSum(ESCExprParser.SumContext ctx) {
+        AggregatorAgent aggr = new AggregatorAgent("Sum");// null, null)
+        aggr.addAggregator(new Sum(ctx.ID(0).getText(), ctx.ID(1).getText()));
+        operators.put(ctx, aggr);
+    }
+
+    @Override
+    public void exitCount(ESCExprParser.CountContext ctx) {
+        AggregatorAgent aggr = new AggregatorAgent("Count");// null, null)
+        aggr.addAggregator(new Count(ctx.ID().getText()));
+        operators.put(ctx, aggr);
+    }
+
+    @Override
+    public void exitSlidingwin(ESCExprParser.SlidingwinContext ctx) {
+        SlidingWindow window = new SlidingWindow(Long.parseLong(ctx.INT(0).getText()), Long.parseLong(ctx.INT(1).getText()), TimeUnit.MILLISECONDS);
+        windows.put(ctx, window);
+        return;
+    }
+
+    @Override
+    public void exitWindow_specification(ESCExprParser.Window_specificationContext ctx) {
+        windows.put(ctx, windows.get(ctx.getChild(0)));
+    }
+
+
+    @Override
+    public void exitMbatch(ESCExprParser.MbatchContext ctx) {
+        MBatchWindow window = new MBatchWindow(Integer.parseInt(ctx.INT(0).getText()),Integer.parseInt(ctx.INT(1).getText()));
+        windows.put(ctx, window);
+    }
+
+    @Override
+    public void exitBatch_n(ESCExprParser.Batch_nContext ctx) {
+       BatchNWindow window = new BatchNWindow(Integer.parseInt(ctx.INT().getText()));
+        windows.put(ctx, window);
     }
     
     

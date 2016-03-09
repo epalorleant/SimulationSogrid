@@ -123,6 +123,7 @@ public class EventProducer extends EPUnit {
 
     @Override
     public void run() {
+        
     }
 
     @Override

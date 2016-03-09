@@ -4,7 +4,6 @@
  */
 package com.imag.nespros.runtime.core;
 
-
 import com.imag.nespros.runtime.base.NameValuePair;
 import com.imag.nespros.runtime.event.EventBean;
 import com.imag.nespros.runtime.logging.MyLogger;
@@ -13,8 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-
 
 /**
  *
@@ -39,8 +36,27 @@ public class AggregatorAgent extends EPUnit {
         logger.log("Operator, isProduced, Processing Time, InputQ Size, OutputQ Size ");
     }
 
+    public AggregatorAgent(String info) {
+        super(info);
+        //this._filter = filter;        
+        this._info = info;
+        this._type = "Aggregator";
+        this._receivers[0] = new TopicReceiver(this);
+        _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
+        logger = new MyLogger("AggregatorMeasures");
+        //logger.log("Operator, isProduced, Processing Time, InputQ Size, OutputQ Size ");
+    }
+
     public void addAggregator(Aggregate aggregator) {
         this.aggregators.add(aggregator);
+    }
+
+    public void setInpuTerminal(String input) {
+        inputTerminal = new IOTerminal(input, "input channel " + _type, _receivers[0], this);
+    }
+
+    public void setOutputTerminal(String output) {
+        outputTerminal = new IOTerminal(output, "output channel " + _type, this);
     }
 
     public List<Aggregate> getAggregators() {
@@ -76,18 +92,18 @@ public class AggregatorAgent extends EPUnit {
         // update the number of event processed by this EPU
         numEventProcessed += operands.length;
         short maxPriority = 0;
-        short minPriority = Short.MAX_VALUE, sumPriority=0, avgPriority =0 ;
+        short minPriority = Short.MAX_VALUE, sumPriority = 0, avgPriority = 0;
         for (EventBean e : operands) {
-            sumPriority+= e.getHeader().getPriority();
-             if (e.getHeader().getPriority() < minPriority) {
+            sumPriority += e.getHeader().getPriority();
+            if (e.getHeader().getPriority() < minPriority) {
                 minPriority = e.getHeader().getPriority();
-            }       
+            }
             if (e.getHeader().getPriority() > maxPriority) {
                 maxPriority = e.getHeader().getPriority();
             }
         }
         avgPriority = (short) (sumPriority / operands.length);
-        
+
         EventBean ec = new EventBean();
         ec.getHeader().setDetectionTime(operands[0].getHeader().getDetectionTime());
         ec.getHeader().setIsComposite(true);
@@ -95,20 +111,20 @@ public class AggregatorAgent extends EPUnit {
         ec.getHeader().setProductionTime(System.currentTimeMillis());
         ec.getHeader().setTypeIdentifier("Aggregate");
         ec.payload.put("processTime", ntime);
-        switch (getPriorityFunction()){
-                            case EPUnit.MAX :
-                                ec.getHeader().setPriority(maxPriority);
-                                break;
-                            case EPUnit.MIN :
-                                ec.getHeader().setPriority(minPriority);
-                                break;
-                            case EPUnit.SUM:
-                                ec.getHeader().setPriority(sumPriority);
-                                break;
-                            default: //avg
-                                ec.getHeader().setPriority(avgPriority);
-                                break;
-                        }
+        switch (getPriorityFunction()) {
+            case EPUnit.MAX:
+                ec.getHeader().setPriority(maxPriority);
+                break;
+            case EPUnit.MIN:
+                ec.getHeader().setPriority(minPriority);
+                break;
+            case EPUnit.SUM:
+                ec.getHeader().setPriority(sumPriority);
+                break;
+            default: //avg
+                ec.getHeader().setPriority(avgPriority);
+                break;
+        }
         for (Aggregate aggregator : aggregators) {
             NameValuePair res = aggregator.aggregate(operands);
             ec.payload.put(res.getAttribute(), (Serializable) res.getValue());

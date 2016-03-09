@@ -5,6 +5,7 @@
  */
 package com.imag.nespros.runtime.core;
 
+import com.imag.nespros.runtime.core.pfunction.PFunction;
 import com.imag.nespros.runtime.event.EventBean;
 import com.imag.nespros.runtime.event.EventComparator2;
 import com.imag.nespros.runtime.logging.MyLogger;
@@ -12,8 +13,7 @@ import com.imag.nespros.runtime.qosmonitor.QoSTuner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-
-
+import java.util.Collections;
 
 /**
  * this operator implements the logic AND operation between 2 event streams
@@ -22,19 +22,23 @@ import java.util.Collection;
  */
 public class ConjunctionAgent extends EPUnit {
 
-    IOTerminal inputTerminalL;
-    IOTerminal inputTerminalR;
+    IOTerminal[] inputTerminals;
+    //IOTerminal inputTerminalR;
     IOTerminal outputTerminal;
 
-    public ConjunctionAgent(String info, String IDinputTerminalL, String IDinputTerminalR, String IDoutputTerminal) {
+    public ConjunctionAgent(String info, String[] IDinputTerminals, String IDinputTerminalR, String IDoutputTerminal) {
 
-        super(info);       
+        super(info);
         this._info = info;
         this._type = "Conjunction";
-        this._receivers[0] = new TopicReceiver(this);
-        this._receivers[1] = new TopicReceiver(this, (short)1);
-        inputTerminalL = new IOTerminal(IDinputTerminalL, "input channel " + _type, _receivers[0], this);
-        inputTerminalR = new IOTerminal(IDinputTerminalR, "input channel " + _type, _receivers[1], this);
+        this._receivers = new TopicReceiver[IDinputTerminals.length];
+        inputTerminals = new IOTerminal[IDinputTerminals.length];
+        short i = 0;
+        for (String input : IDinputTerminals) {
+            this._receivers[i] = new TopicReceiver(this, i);
+            inputTerminals[i] = new IOTerminal(input, "input channel " + _type, _receivers[i], this);
+            i++;
+        }
         outputTerminal = new IOTerminal(IDoutputTerminal, "output channel " + _type, this);
         _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
         logger = new MyLogger("ConjunctionMeasures");
@@ -44,8 +48,9 @@ public class ConjunctionAgent extends EPUnit {
     @Override
     public Collection<IOTerminal> getInputTerminals() {
         ArrayList<IOTerminal> inputs = new ArrayList<IOTerminal>();
-        inputs.add(inputTerminalL);
-        inputs.add(inputTerminalR);
+        for (IOTerminal io : inputTerminals) {
+            inputs.add(io);
+        }
         return inputs;
     }
 
@@ -56,13 +61,13 @@ public class ConjunctionAgent extends EPUnit {
 
     @Override
     public void process() {
-        
-        EventBean[] Values = new EventBean[1];
-        ArrayList<EventBean> lValues, rValues;
 
+        EventBean[] Values = new EventBean[1];
+        ArrayList<ArrayList<EventBean>> inValues = new ArrayList<>();
         // statistics: #events processed, processing time
         long time = System.currentTimeMillis();
-        long ntime = System.nanoTime(); // to compute the processing time for that cycle
+        // to compute the processing time for that cycle
+        long ntime = System.nanoTime();
         EventBean select = _selectedEvents.poll();
 
         if (select != null) {
@@ -73,95 +78,94 @@ public class ConjunctionAgent extends EPUnit {
                 Values[0] = select;
             }
         }
-        lValues = new ArrayList<>();
-        rValues = new ArrayList<>();
-
+        for (int i = 0; i < inputTerminals.length; i++) {
+            inValues.add(new ArrayList<EventBean>());
+        }
         for (EventBean e : Values) {
-            if (e.getValue("flag").toString().equals("0")) {
-                lValues.add(e);
-            } else {
-                rValues.add(e);
-            }
+            short u = (short) e.getValue("flag");
+            inValues.get(u).add(e);
             e.payload.remove("flag");
         }
-        EventBean[] lV, rV;
-            lV = (EventBean[]) lValues.toArray(new EventBean[0]);
-            rV = (EventBean[]) rValues.toArray(new EventBean[0]);
-        
-        if (!lValues.isEmpty() && !rValues.isEmpty()) {
-
+        //EventBean[] lV, rV;
+        //   lV = (EventBean[]) lValues.toArray(new EventBean[0]);
+        //rV = (EventBean[]) rValues.toArray(new EventBean[0]);
+        boolean ok = true;
+        for (ArrayList<EventBean> inValue : inValues) {
+            if (inValue.isEmpty()) {
+                ok = false;
+                break;
+            }
+        }
+        // should we produce a composite event?
+        if (ok) {
             // many event instances can match... the selection mode should clearly define the event to select
             switch (selectionMode) {
                 case SelectionMode.MODE_CONTINUOUS: {
-
-                    for (EventBean l : lValues) {
-                        for (EventBean r : rValues) {
-                            EventBean ec = new EventBean();
-                            ec.getHeader().setDetectionTime(Math.min(r.getHeader().getDetectionTime(), l.getHeader().getDetectionTime()));
-                            
-                            
-                            switch (getPriorityFunction()){
-                            case EPUnit.MAX :
-                                ec.getHeader().setPriority((short) Math.max(l.getHeader().getPriority(), r.getHeader().getPriority()));
-                                break;
-                            case EPUnit.MIN :
-                                ec.getHeader().setPriority((short) Math.min(l.getHeader().getPriority(), r.getHeader().getPriority()));
-                                break;
-                            case EPUnit.SUM:
-                                ec.getHeader().setPriority((short) (l.getHeader().getPriority()+ r.getHeader().getPriority()));
-                                break;
-                            default: //avg
-                                ec.getHeader().setPriority((short) ((l.getHeader().getPriority()+ r.getHeader().getPriority())/2));
-                                break;
-                        } 
-                            
-                           // ec.getHeader().setPriority((short) Math.max(l.getHeader().getPriority(), r.getHeader().getPriority()));
-                            
-                            ec.getHeader().setIsComposite(true);
-                            ec.getHeader().setProductionTime(System.currentTimeMillis());
-                            ec.getHeader().setProducerID(this.getName());
-                            ec.getHeader().setTypeIdentifier("Conjunction");
-                            ec.payload.put("l", l);
-                            ec.payload.put("r", r);
-                            ec.payload.put("ttl", TTL);
-                            ec.payload.put("processTime", ntime);
-                            _outputQueue.put(ec);
-                            numEventProduced++;
-                            getExecutorService().execute(getOutputNotifier());
-                        }
+                    EventBean[] evts = new EventBean[inputTerminals.length];
+                    int i = 0;
+                    for (ArrayList<EventBean> inValue : inValues) {
+                        evts[i] = inValue.get(0);
+                        i++;
                     }
-                }
-                break;
-                case SelectionMode.MODE_CHRONOLOGIC: {
-
-                    Arrays.sort(lV, 0, lV.length - 1, new EventComparator2());
-                    Arrays.sort(rV, 0, rV.length - 1, new EventComparator2());
+                    // for (EventBean r : rValues) {
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(Math.min(rV[0].getHeader().getDetectionTime(), lV[0].getHeader().getDetectionTime()));
-                    
-                    switch (getPriorityFunction()){
-                            case EPUnit.MAX :
-                                ec.getHeader().setPriority((short) Math.max(lV[0].getHeader().getPriority(), rV[0].getHeader().getPriority()));
-                                break;
-                            case EPUnit.MIN :
-                                ec.getHeader().setPriority((short) Math.min(lV[0].getHeader().getPriority(), rV[0].getHeader().getPriority()));
-                                break;
-                            case EPUnit.SUM:
-                                ec.getHeader().setPriority((short) (lV[0].getHeader().getPriority()+ rV[0].getHeader().getPriority()));
-                                break;
-                            default: //avg
-                                ec.getHeader().setPriority((short) ((lV[0].getHeader().getPriority()+ rV[0].getHeader().getPriority())/2));
-                                break;
-                        } 
-                    
-                   // ec.getHeader().setPriority((short) Math.max(lV[0].getHeader().getPriority(), rV[0].getHeader().getPriority()));
-                    
+                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
                     ec.getHeader().setIsComposite(true);
                     ec.getHeader().setProductionTime(System.currentTimeMillis());
                     ec.getHeader().setProducerID(this.getName());
                     ec.getHeader().setTypeIdentifier("Conjunction");
-                    ec.payload.put("l", lV[0]);
-                    ec.payload.put("r", rV[0]);
+                    ec.payload.put("processTime", ntime);
+                    ec.payload.put("ttl", TTL);
+                    ec.payload.put("data", evts);
+                    switch (getPriorityFunction()) {
+                        case EPUnit.MAX:
+                            ec.getHeader().setPriority(PFunction.maxPriority(evts));
+                            break;
+                        case EPUnit.MIN:
+                            ec.getHeader().setPriority(PFunction.minPriority(evts));
+                            break;
+                        case EPUnit.SUM:
+                            ec.getHeader().setPriority(PFunction.sumPriority(evts));
+                            break;
+                        default: //avg
+                            ec.getHeader().setPriority(PFunction.avgPriority(evts));
+                            break;
+                    }
+                    _outputQueue.put(ec);
+                    numEventProduced++;
+                    getExecutorService().execute(getOutputNotifier());
+                }
+                break;
+                case SelectionMode.MODE_CHRONOLOGIC: {
+                    EventBean[] evts = new EventBean[inputTerminals.length];
+                    int i = 0;
+                    for (ArrayList<EventBean> inValue : inValues) {
+                        Collections.sort(inValue, new EventComparator2());
+                        evts[i] = inValue.get(0);
+                        i++;
+                    }                                        
+                    EventBean ec = new EventBean();
+                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+
+                    switch (getPriorityFunction()) {
+                        case EPUnit.MAX:
+                            ec.getHeader().setPriority(PFunction.maxPriority(evts));
+                            break;
+                        case EPUnit.MIN:
+                            ec.getHeader().setPriority(PFunction.minPriority(evts));
+                            break;
+                        case EPUnit.SUM:
+                            ec.getHeader().setPriority(PFunction.sumPriority(evts));
+                            break;
+                        default: //avg
+                            ec.getHeader().setPriority(PFunction.avgPriority(evts));
+                            break;
+                    }
+                    ec.getHeader().setIsComposite(true);
+                    ec.getHeader().setProductionTime(System.currentTimeMillis());
+                    ec.getHeader().setProducerID(this.getName());
+                    ec.getHeader().setTypeIdentifier("Conjunction");
+                    ec.payload.put("data", evts);
                     ec.payload.put("ttl", TTL);
                     ec.payload.put("processTime", ntime);
                     _outputQueue.put(ec);
@@ -171,30 +175,33 @@ public class ConjunctionAgent extends EPUnit {
                 break;
 
                 case SelectionMode.MODE_PRIORITY: {
-                    // long ntime = System.nanoTime();
+                    EventBean[] evts = new EventBean[inputTerminals.length];
+                    int i = 0;
+                    for (ArrayList<EventBean> inValue : inValues) {
+                        evts[i] = inValue.get(0);
+                        i++;
+                    }
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(Math.min(rV[0].getHeader().getDetectionTime(), lV[0].getHeader().getDetectionTime()));
-                    switch (getPriorityFunction()){
-                            case EPUnit.MAX :
-                                ec.getHeader().setPriority((short) Math.max(lV[0].getHeader().getPriority(), rV[0].getHeader().getPriority()));
-                                break;
-                            case EPUnit.MIN :
-                                ec.getHeader().setPriority((short) Math.min(lV[0].getHeader().getPriority(), rV[0].getHeader().getPriority()));
-                                break;
-                            case EPUnit.SUM:
-                                ec.getHeader().setPriority((short) (lV[0].getHeader().getPriority()+ rV[0].getHeader().getPriority()));
-                                break;
-                            default: //avg
-                                ec.getHeader().setPriority((short) ((lV[0].getHeader().getPriority()+ rV[0].getHeader().getPriority())/2));
-                                break;
-                        } 
-                    ec.getHeader().setPriority((short) Math.max(lV[0].getHeader().getPriority(), rV[0].getHeader().getPriority()));
+                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+                    switch (getPriorityFunction()) {
+                        case EPUnit.MAX:
+                            ec.getHeader().setPriority(PFunction.maxPriority(evts));
+                            break;
+                        case EPUnit.MIN:
+                            ec.getHeader().setPriority(PFunction.minPriority(evts));
+                            break;
+                        case EPUnit.SUM:
+                            ec.getHeader().setPriority(PFunction.sumPriority(evts));
+                            break;
+                        default: //avg
+                            ec.getHeader().setPriority(PFunction.avgPriority(evts));
+                            break;
+                    }                    
                     ec.getHeader().setIsComposite(true);
                     ec.getHeader().setProductionTime(System.currentTimeMillis());
                     ec.getHeader().setProducerID(this.getName());
                     ec.getHeader().setTypeIdentifier("Conjunction");
-                    ec.payload.put("l", lV[0]);
-                    ec.payload.put("r", rV[0]);
+                    ec.payload.put("data", evts);
                     ec.payload.put("ttl", TTL);
                     ec.payload.put("processTime", ntime);
                     _outputQueue.put(ec);
@@ -204,33 +211,36 @@ public class ConjunctionAgent extends EPUnit {
                 break;
 
                 default: { /// mode recent
-                    //long ntime = System.nanoTime();
-                    Arrays.sort(lV, 0, lV.length - 1, new EventComparator2());
-                    Arrays.sort(lV, 0, rV.length - 1, new EventComparator2());
+                     EventBean[] evts = new EventBean[inputTerminals.length];
+                    int i = 0;
+                    for (ArrayList<EventBean> inValue : inValues) {
+                        Collections.sort(inValue, new EventComparator2());
+                        evts[i] = inValue.get(inValue.size()-1);
+                        i++;
+                    }                  
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(Math.min(rV[rV.length - 1].getHeader().getDetectionTime(), lV[lV.length - 1].getHeader().getDetectionTime()));
-                                        
-                    switch (getPriorityFunction()){
-                            case EPUnit.MAX :
-                                ec.getHeader().setPriority((short) Math.max(lV[lV.length - 1].getHeader().getPriority(), rV[rV.length - 1].getHeader().getPriority()));
-                                break;
-                            case EPUnit.MIN :
-                                ec.getHeader().setPriority((short) Math.min(lV[lV.length - 1].getHeader().getPriority(), rV[rV.length - 1].getHeader().getPriority()));
-                                break;
-                            case EPUnit.SUM:
-                                ec.getHeader().setPriority((short) (lV[lV.length - 1].getHeader().getPriority()+ rV[rV.length - 1].getHeader().getPriority()));
-                                break;
-                            default: //avg
-                                ec.getHeader().setPriority((short) ((lV[lV.length - 1].getHeader().getPriority()+ rV[rV.length - 1].getHeader().getPriority())/2));
-                                break;
-                        }       
-                   // ec.getHeader().setPriority((short) Math.max(lV[lV.length - 1].getHeader().getPriority(), rV[rV.length - 1].getHeader().getPriority()));
+                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+
+                    switch (getPriorityFunction()) {
+                        case EPUnit.MAX:
+                            ec.getHeader().setPriority(PFunction.maxPriority(evts));
+                            break;
+                        case EPUnit.MIN:
+                            ec.getHeader().setPriority(PFunction.minPriority(evts));
+                            break;
+                        case EPUnit.SUM:
+                            ec.getHeader().setPriority(PFunction.sumPriority(evts));
+                            break;
+                        default: //avg
+                            ec.getHeader().setPriority(PFunction.avgPriority(evts));
+                            break;
+                    }  
+                    // ec.getHeader().setPriority((short) Math.max(lV[lV.length - 1].getHeader().getPriority(), rV[rV.length - 1].getHeader().getPriority()));
                     ec.getHeader().setIsComposite(true);
                     ec.getHeader().setProductionTime(System.currentTimeMillis());
                     ec.getHeader().setProducerID(this.getName());
                     ec.getHeader().setTypeIdentifier("Conjunction");
-                    ec.payload.put("l", lV[lV.length - 1]);
-                    ec.payload.put("r", rV[rV.length - 1]);
+                    ec.payload.put("data", evts);
                     ec.payload.put("ttl", TTL);
                     ec.payload.put("processTime", ntime);
                     numEventProduced++;
@@ -239,7 +249,7 @@ public class ConjunctionAgent extends EPUnit {
                 }
                 break;
             }
-            
+
             // update statistics: number event processed
             numEventProcessed += Values.length;
         }

@@ -138,6 +138,10 @@ public class ComLink extends Thread {
         normalDist.setState(latency, dev);
     }
 
+    public LinkedBlockingQueue<EventPacket> getPendingPackets() {
+        return pendingPackets;
+    }
+
 
     /*
      public Sim_port getOutputPort1() {

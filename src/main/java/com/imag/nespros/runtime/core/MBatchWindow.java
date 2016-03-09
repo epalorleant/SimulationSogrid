@@ -17,21 +17,22 @@ import java.util.Queue;
  *
  * @author epaln
  */
-public class LastNWindow extends WindowHandler {
+public class MBatchWindow extends WindowHandler {
 
     //WindowAgent _wagent;
-    int _size;
+    int _size, skip;
     Notifier notifier;
 
-    public LastNWindow(int _size) {
+    public MBatchWindow(int _size, int skip) {
         this._size = _size;
+        this.skip = skip;
     }
 
     @Override
     public void register(EPUnit agent) {
         //  _wagent = agent;
         _agent = agent;
-        Observable<Observable<EventBean>> windows = Reactive.window(_agent.getSourceStream(), _size, 1);
+        Observable<Observable<EventBean>> windows = Reactive.window(_agent.getSourceStream(), _size, skip);
 
         windows.register(new ObserverAdapter<Observable<EventBean>>() {
             @Override

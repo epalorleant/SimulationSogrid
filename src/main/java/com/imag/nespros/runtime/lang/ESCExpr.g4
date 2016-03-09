@@ -10,7 +10,7 @@ expression : esc_expression ('parameters' '{' params '}')?;
 
 esc_expression: streamdef | operator_def '(' esc_expression (',' esc_expression)* ')' (':' window_specification)? ;
 
-streamdef: STREAM '(' ID ')' ;
+streamdef: STREAM '(' ID (',' ID)? ')' ;
 
 window_specification: batch_n | mbatch | timefixed | slidingwin;
 
@@ -41,9 +41,9 @@ term:  ID sign=(LT | GT | EQ |GEQ| LEQ| NEQ) val=(INT| DOUBLE|STRING) | '(' pred
 aggregate: average | sum | count| min | max;
 sum : 'sum' '[' ID ',' ID ']';
 average: 'avg' '[' ID ',' ID ']';
-count : 'count';
-min: 'min' '[' ID ']';
-max: 'max' '[' ID ']';
+count : 'count' '[' ID ']';
+min: 'min' '[' ID ',' ID ']';
+max: 'max' '[' ID ',' ID ']';
          
 params : param (',' param)* ;
 
