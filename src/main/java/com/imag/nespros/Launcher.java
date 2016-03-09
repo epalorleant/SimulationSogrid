@@ -21,6 +21,7 @@ import com.imag.nespros.runtime.core.TimeBatchWindow;
 import com.imag.nespros.samples.consumer.Consumer;
 import com.imag.nespros.samples.event.MeterEvent;
 import com.imag.nespros.samples.producer.MeterSimulator;
+import com.imag.nespros.samples.producer.NTPClient;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -45,7 +46,6 @@ public class Launcher {
     
             
     public static void main(String[] args) throws URISyntaxException{
-        //Sim_system.initialise();
         ArrayList<EPUnit> operators = new ArrayList<>();
         if (args.length == 3) {
             NUMBER = Integer.parseInt(args[0]);
@@ -57,49 +57,13 @@ public class Launcher {
         
         Consumer c =new Consumer(utility);
         utility.setHAndler(c);
-        operators.add(utility);        
-        //FilterAgent filter = new FilterAgent("FilterA","MeterEvent", "Filtered");
-        //filter.addFilter(new GreatherOrEqualFilter("realPowerWatts", 1d));
-        //filter.setExecutionTime(1);
-        //filter.setUsedMemory(10);
-        
-        //AggregatorAgent aggregate = new AggregatorAgent("AVG_PWR", "Filtered", "Aggregated");
-        //aggregate.setWindowHandler(new TimeBatchWindow(10, TimeUnit.SECONDS));
-        //aggregate.addAggregator(new Avg("realPowerWatts", "avgPwr"));        
-        //aggregate.setExecutionTime(1000);
-        //aggregate.setUsedMemory(50);
-        
-        //FilterAgent filterB = new FilterAgent("FilterB","Filtered", "FilteredB");
-        //filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
-        //filterB.setExecutionTime(1);
-        //filterB.setUsedMemory(10);
-        
-        //DisjunctionAgent orAgent = new DisjunctionAgent("OR", "FilteredB", "Aggregated", "Result");
-        //orAgent.setExecutionTime(1);
-        //orAgent.setUsedMemory(15);
-        //orAgent.setWindowHandler(new TimeBatchWindow(5, TimeUnit.SECONDS));
-        
-        
-         //operators.add(orAgent);
-         //operators.add(filterB);        
-        //operators.add(aggregate);
-        //operators.add(filter);
+        operators.add(utility);                
        
-         ResourceLoader r = new ResourceLoader();
-        //File folder = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());//r.getRessource(path);
-        String[] listOfFiles = r.listFiles(path); 
-       
-        for (int i = 0; i < listOfFiles.length; i++) {
-            if ( i < NUMBER) {                                              
-                MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"NTP_Event", 
-                        r.getRessource(listOfFiles[i]), meterSchema, types, delay, MeterEvent.class)
-                        .simulate("realPowerWatts");
-                 operators.add(simulator);                                
-                simulator.setMapped(false);                
-            }
-            else{
-                break;
-            }
+        for (int i = 0; i < NUMBER; i++) {
+                                                        
+                NTPClient client = new NTPClient("NTP_Client_"+i, "NTP_Event", delay);
+                operators.add(client);
+                client.setMapped(false);                 
         }
         EPGraph.getInstance().AddEPGraphFromList(operators);        
         g = GraphEditor.getInstance();

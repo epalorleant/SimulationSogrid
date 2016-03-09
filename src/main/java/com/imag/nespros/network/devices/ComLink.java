@@ -48,11 +48,7 @@ public class ComLink extends Thread {
     //private Sim_port outputPort1, outputPort2;
     public ComLink(String ID) {
         //super(ID);
-        this.ID = ID;
-        //outputPort1 = new Sim_port("Out1");
-        //add_port(outputPort1);
-        //outputPort2 = new Sim_port("Out2");
-        //add_port(outputPort2);
+        this.ID = ID;       
         pendingPackets = new LinkedBlockingQueue<>();
         logger = new MyLogger("Latencies_" + ID);
 
@@ -139,15 +135,6 @@ public class ComLink extends Thread {
     }
 
 
-    /*
-     public Sim_port getOutputPort1() {
-     return outputPort1;
-     }
-
-     public Sim_port getOutputPort2() {
-     return outputPort2;
-     }
-     */
     public void putPacket(EventPacket packet) {
         try {
             //System.out.println("sending packet via " + ID);
@@ -181,7 +168,7 @@ public class ComLink extends Thread {
                     lock.wait();
                     d.receiveEventPacket(packet);
                 }
-                logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried);
+                logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried+", "+ pendingPackets.size());
             }
         } catch (InterruptedException ex) {
             return false;
@@ -191,7 +178,7 @@ public class ComLink extends Thread {
 
     @Override
     public void run() {
-        logger.log("Timestamp, Latency, #Try");
+        logger.log("Timestamp, Latency, #Try, #PendingPackets");
         while (true) {
             try {
                 EventPacket packet = pendingPackets.take();

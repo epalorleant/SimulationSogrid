@@ -56,7 +56,8 @@ public class MeterSimulator extends EventProducer {
         try {
             boolean isSimulating = false;
             //System.out.println("generating events...");
-            int i = 1;
+            //int i = 1;
+            Thread.sleep(random.nextInt((int) delay));
             EventBean e = new EventBean();
             e.payload.put("sender", this.getDevice());
             e.payload.put("TT", System.currentTimeMillis());

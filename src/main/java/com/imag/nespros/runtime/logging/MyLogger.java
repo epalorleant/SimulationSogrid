@@ -4,6 +4,7 @@
  */
 package com.imag.nespros.runtime.logging;
 
+import java.io.File;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,11 +30,15 @@ public class MyLogger {
 
     private void parametrer() {
         try {
-
+            File f = new File("log");
+            if(!f.isDirectory()){
+                f.mkdir();
+            }
             // Create Logger
             logger = Logger.getAnonymousLogger();//getLogger(classname);
             logger.setLevel(Level.ALL);
-            fileTxt = new FileHandler(fileName + ".txt");
+            
+            fileTxt = new FileHandler("log/"+fileName + ".txt");
 
             // Create txt Formatter
             formatterTxt = new MyFormatter();
