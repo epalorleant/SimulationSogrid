@@ -10,7 +10,7 @@ import cern.jet.random.Normal;
 import cern.jet.random.engine.RandomEngine;
 import com.imag.nespros.gui.animation.EdgeAnimation;
 import com.imag.nespros.gui.plugin.GraphEditor;
-import com.imag.nespros.network.routing.EventPacket;
+import com.imag.nespros.network.routing.DataPacket;
 import com.imag.nespros.network.routing.Topology;
 import com.imag.nespros.runtime.logging.MyLogger;
 import java.awt.Color;
@@ -29,9 +29,10 @@ public class ComLink extends Thread {
     private String ID;
     private int size;
     private int bandwidth;
-    private LinkedBlockingQueue<EventPacket> pendingPackets;
+    private LinkedBlockingQueue<DataPacket> pendingPackets;
     private double lossRate;
     private double dev;
+    private boolean down;
     //private int packetlost;
 
     // for display control
@@ -55,7 +56,7 @@ public class ComLink extends Thread {
         //add_port(outputPort2);
         pendingPackets = new LinkedBlockingQueue<>();
         logger = new MyLogger("Latencies_" + ID);
-
+        down = false;
         //delay = new Sim_normal_obj("Latency", latency, var);
         latency = 10;
         dev = Math.sqrt(latency);
@@ -138,21 +139,19 @@ public class ComLink extends Thread {
         normalDist.setState(latency, dev);
     }
 
-    public LinkedBlockingQueue<EventPacket> getPendingPackets() {
+    public LinkedBlockingQueue<DataPacket> getPendingPackets() {
         return pendingPackets;
     }
 
+    public boolean isDown() {
+        return down;
+    }
 
-    /*
-     public Sim_port getOutputPort1() {
-     return outputPort1;
-     }
-
-     public Sim_port getOutputPort2() {
-     return outputPort2;
-     }
-     */
-    public void putPacket(EventPacket packet) {
+    public void setDown(boolean down) {
+        this.down = down;
+    }
+   
+    public void putPacket(DataPacket packet) {
         try {
             //System.out.println("sending packet via " + ID);
             pendingPackets.put(packet);
@@ -161,7 +160,10 @@ public class ComLink extends Thread {
         }
     }
 
-    protected boolean send(EventPacket packet) {
+    protected boolean send(DataPacket packet) {
+        if(isDown()){
+            return false;
+        }
         packet.setInputLink(this);
         int overhead = 0, tried = 1;
         while (bernoulliDist.nextInt() == 1) {
@@ -198,7 +200,7 @@ public class ComLink extends Thread {
         logger.log("Timestamp, Latency, #Try, #PendingPackets");
         while (true) {
             try {
-                EventPacket packet = pendingPackets.take();
+                DataPacket packet = pendingPackets.take();
                 send(packet);
             } catch (InterruptedException ex) {
 
@@ -213,7 +215,7 @@ public class ComLink extends Thread {
         edgeAnimation.animate(this, image, lock);
     }
 
-    private int getDirection(EventPacket p) {
+    private int getDirection(DataPacket p) {
 
         Device d = p.getOrigin();
         Device dest = Topology.getInstance().getGraph().getSource(this);

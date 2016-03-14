@@ -17,35 +17,35 @@ import java.util.Collection;
  *
  * @author epaln
  */
-public class EventPacket implements Serializable{
+public class DataPacket implements Serializable{
     private Device origin;
     private Device source;
     private ArrayList<Device> destination;
-    private ComLink path;
+    //private ComLink path;
     private ComLink inputLink;
     private Object event;
     private String topic;
     private Color color = Color.BLUE;
     
-    public EventPacket(Object event) {
+    public DataPacket(Object event) {
         this.destination = new ArrayList<Device>();
         this.event = event;
-        path = null;
+        //path = null;
     }
 
-    public EventPacket(Device origin, Object event) {
+    public DataPacket(Device origin, Object event) {
         this.destination = new ArrayList<Device>();
         this.origin = origin;
         this.event = event;
-        path = null;
+        //path = null;
     }
 
-    public EventPacket(Device origin, Object event, String topic) {
+    public DataPacket(Device origin, Object event, String topic) {
         this.destination = new ArrayList<Device>();
         this.origin = origin;
         this.event = event;
         this.topic = topic;
-        path = null;
+       // path = null;
     }
 
     public Device getOrigin() {
@@ -63,11 +63,11 @@ public class EventPacket implements Serializable{
     public void setEvent(Object event) {
         this.event = event;
     }
-
+/*
     public ComLink getPath() {
         return path;
     }
-
+*/
     public String getTopic() {
         return topic;
     }
@@ -83,12 +83,13 @@ public class EventPacket implements Serializable{
     public void setInputLink(ComLink inputLink) {
         this.inputLink = inputLink;
     }
-    
+   
+    /*
     public void setPathToDestination(Device depart, Device dest){
         path = null;
         path= Topology.getInstance().getPath(depart, dest).get(0);
     }
-
+*/
     public ArrayList<Device> getDestination() {
         return destination;
     }
@@ -115,9 +116,9 @@ public class EventPacket implements Serializable{
     public void setColor(Color color) {
         this.color = color;
     }
-    public EventPacket clone(){
-        EventPacket ep = new EventPacket(origin, event, topic);
-        ep.path = path;
+    public DataPacket clone(){
+        DataPacket ep = new DataPacket(origin, event, topic);
+        //ep.path = path;
         ep.color = color;
         //ep.destination = destination;
         return ep;

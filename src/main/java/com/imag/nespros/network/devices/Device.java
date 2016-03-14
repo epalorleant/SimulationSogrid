@@ -6,7 +6,7 @@
 package com.imag.nespros.network.devices;
 
 import com.imag.nespros.gui.plugin.MyLayeredIcon;
-import com.imag.nespros.network.routing.EventPacket;
+import com.imag.nespros.network.routing.DataPacket;
 import com.imag.nespros.network.routing.PubSubService;
 import com.imag.nespros.network.routing.Topic2Device;
 import com.imag.nespros.network.routing.Topology;
@@ -41,7 +41,7 @@ public class Device extends Thread implements Serializable {
     // The local Pub/Sub service 
     PubSubService pubSubService;
     private ArrayList<EPUnit> operators;
-    private LinkedBlockingQueue<EventPacket> inputQueue;
+    private LinkedBlockingQueue<DataPacket> inputQueue;
     private Color packetColor = Color.BLUE;
     protected MyLayeredIcon icon;
 
@@ -119,22 +119,22 @@ public class Device extends Thread implements Serializable {
         return deviceName;
     }
 
-    public LinkedBlockingQueue<EventPacket> getInputQueue() {
+    public LinkedBlockingQueue<DataPacket> getInputQueue() {
         return inputQueue;
     }
 
-    public void setInputQueue(LinkedBlockingQueue<EventPacket> inputQueue) {
+    public void setInputQueue(LinkedBlockingQueue<DataPacket> inputQueue) {
         this.inputQueue = inputQueue;
     }
 
-    public synchronized void receiveEventPacket(EventPacket packet) {
+    public synchronized void receiveEventPacket(DataPacket packet) {
         inputQueue.add(packet);
     }
 
-    private void forwardEventPacket(EventPacket packet) {
+    private void forwardEventPacket(DataPacket packet) {
         // for routing ijn the right direction ;)
         packet.setOrigin(this);
-        HashMap<ComLink, EventPacket> map = new HashMap<>();
+        HashMap<ComLink, DataPacket> map = new HashMap<>();
         //EventPacket ep = packet.clone();
         for(Device d: packet.getDestination()){
             ComLink interf = getPathToDestination(this, d);
@@ -142,7 +142,7 @@ public class Device extends Thread implements Serializable {
             if(interf == packet.getInputLink() || interf == null){
                 continue;
             }
-            EventPacket ep = map.get(interf);
+            DataPacket ep = map.get(interf);
             if(ep == null){
                 ep = packet.clone();
                 ep.getDestination().add(d);
@@ -153,7 +153,7 @@ public class Device extends Thread implements Serializable {
             }
         }
         for(ComLink link: map.keySet()){
-            EventPacket ep = map.get(link);
+            DataPacket ep = map.get(link);
             link.putPacket(ep);
         }
 //        packet.setPathToDestination(this, );
@@ -174,7 +174,7 @@ public class Device extends Thread implements Serializable {
     public void run() {
         while (true) {
             try {                
-                EventPacket packet = inputQueue.take();                
+                DataPacket packet = inputQueue.take();                
                 if (/*packet.getPath() == null ||*/ packet.getDestination().contains(this)) { // then, the packet arrived at destination. We can process it here.
                     process(packet);
                     packet.getDestination().remove(this);
@@ -190,7 +190,7 @@ public class Device extends Thread implements Serializable {
         }
     }
 
-    protected void process(EventPacket packet) {
+    protected void process(DataPacket packet) {
         pubSubService.publish(packet.getEvent(), packet.getTopic());
     }
 
@@ -212,11 +212,17 @@ public class Device extends Thread implements Serializable {
      * @param packet
      * @param dest
      */
-    protected void sendPacket(EventPacket packet, Collection<Device> dest) {
+    protected void sendPacket(DataPacket packet, Collection<Device> dest) {
         // set the destination of this packet.
         packet.setSource(this);
         packet.setDestination(dest);
         forwardEventPacket(packet);
+    }
+    
+    protected void sendPacket(DataPacket packet, Device dest){
+        ArrayList<Device> d = new ArrayList<>();
+        d.add(dest);
+        sendPacket(packet, d);
     }
 
     /**
@@ -231,7 +237,7 @@ public class Device extends Thread implements Serializable {
                 pubSubService.publish(event, topic);
                 
             }
-            EventPacket packet = new EventPacket(this, event, topic);
+            DataPacket packet = new DataPacket(this, event, topic);
             packet.setColor(packetColor);
             sendPacket(packet, Topic2Device.getInstance().getTopic2device().get(topic));
         }

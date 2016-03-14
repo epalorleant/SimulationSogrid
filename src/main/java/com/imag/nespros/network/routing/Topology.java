@@ -64,6 +64,9 @@ public class Topology {
         Transformer<ComLink, Integer> wtTransformer = new Transformer<ComLink,Integer>() {
         @Override
         public Integer transform(ComLink link) {
+            if(link.isDown()){
+                return Integer.MAX_VALUE;
+            }
             return link.getLatency()*(link.getPendingPackets().size()+1);
         }
     };

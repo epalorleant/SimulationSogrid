@@ -670,6 +670,13 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                     }
                 }
         );
+        graphWriter.addEdgeData("down", null, "false",
+                new Transformer<ComLink, String>() {
+                    public String transform(ComLink e) {
+                        return e.isDown()+"";
+                    }
+                }
+        );
         graphWriter.save(graph, out);
 
     }
@@ -726,9 +733,11 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                     public ComLink transform(EdgeMetadata metadata) {
                         int latency = Integer.parseInt(metadata.getProperty("latency"));
                         String ID = metadata.getProperty("ID");
+                        boolean ok = Boolean.getBoolean(metadata.getProperty("down"));
                         ComLink e = new ComLink(ID);
                         e.setLatency(latency);
                         e.setDefinedlatency(latency);
+                        e.setDown(ok);
                         ComLinkFactory.updateLinkCount();
                         return e;
                     }
