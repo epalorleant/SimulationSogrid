@@ -40,7 +40,7 @@ public class MeterSimulator extends EventProducer {
 
     public MeterSimulator(String name, String typeName, InputStream file, String[] propertyOrder,
             String[] dataTypes, long delay, Class clazz) {
-        super(name, typeName, clazz);
+        super(name, clazz);
         this.typeName = typeName;
         this.delay = delay;
         this.definedDelay = delay;

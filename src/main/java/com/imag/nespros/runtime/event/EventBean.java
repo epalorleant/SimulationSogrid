@@ -6,7 +6,6 @@ package com.imag.nespros.runtime.event;
 
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
 import objectexplorer.MemoryMeasurer;
 
 /**
@@ -27,7 +26,7 @@ public class EventBean implements Serializable {
         return header;
     }
 
-    public Serializable getValue(String attr) {
+    public Serializable getValue(String attr) {        
         String[] attrs = attr.split("\\.");
         if (attrs.length == 1) {
             if (!payload.containsKey(attrs[0])) {

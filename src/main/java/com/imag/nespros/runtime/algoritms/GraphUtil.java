@@ -175,7 +175,7 @@ public class GraphUtil<V, E> {
 
     public Solution initialMapping(DirectedSparseGraph<EPUnit, EventChannel> epn){
         HashMap<EPUnit, Device> init = new HashMap<>();
-        for(EPUnit epu : EPGraph.getInstance().getGraph().getVertices()){
+        for(EPUnit epu : epn.getVertices()){
             if(epu.isMapped()){
                 init.put(epu, epu.getDevice());
             }
@@ -216,9 +216,7 @@ public class GraphUtil<V, E> {
             }
         }
         return null;
-    }
-
-    
+    }    
     
     public List<V> getVerticesList(Graph<V, E> g) {
         ArrayList<V> vertices = new ArrayList<>();

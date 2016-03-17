@@ -53,34 +53,42 @@ public class Launcher {
             duration = Integer.parseInt(args[2]);
         }
         
+        Simulation s = new Simulation();      
         EventConsumer utility = new EventConsumer("Utility","Result", new Consumer());
-        operators.add(utility);        
+        //operators.add(utility);   
+        s.addConsumer(utility);
+        
         FilterAgent filter = new FilterAgent("FilterA","MeterEvent", "Filtered");
         filter.addFilter(new GreatherOrEqualFilter("realPowerWatts", 1d));
         filter.setExecutionTime(1);
         filter.setUsedMemory(10);
-        
+        utility.getEPUList().add(filter);
+                
         AggregatorAgent aggregate = new AggregatorAgent("AVG_PWR", "Filtered", "Aggregated");
         aggregate.setWindowHandler(new TimeBatchWindow(10, TimeUnit.SECONDS));
         aggregate.addAggregator(new Avg("realPowerWatts", "avgPwr"));        
         aggregate.setExecutionTime(1000);
         aggregate.setUsedMemory(50);
+        utility.getEPUList().add(aggregate);
         
         FilterAgent filterB = new FilterAgent("FilterB","Filtered", "FilteredB");
         filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
         filterB.setExecutionTime(1);
         filterB.setUsedMemory(10);
+        utility.getEPUList().add(filterB);
+        
         String[] inputs = {"FilteredB", "Aggregated"};
         DisjunctionAgent orAgent = new DisjunctionAgent("OR", inputs, "Result");
         orAgent.setExecutionTime(1);
         orAgent.setUsedMemory(15);
+        utility.getEPUList().add(orAgent);
         //orAgent.setWindowHandler(new TimeBatchWindow(5, TimeUnit.SECONDS));
         
         
-         operators.add(orAgent);
-         operators.add(filterB);        
-        operators.add(aggregate);
-        operators.add(filter);
+         //operators.add(orAgent);
+         //operators.add(filterB);        
+        //operators.add(aggregate);
+        //operators.add(filter);
        
          ResourceLoader r = new ResourceLoader();
         //File folder = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());//r.getRessource(path);
@@ -91,14 +99,17 @@ public class Launcher {
                 MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"MeterEvent", 
                         r.getRessource(listOfFiles[i]), meterSchema, types, delay, MeterEvent.class)
                         .simulate("realPowerWatts");
-                 operators.add(simulator);                                
-                simulator.setMapped(false);                
+                 //operators.add(simulator);                                
+                simulator.setMapped(false); 
+                //utility.getEPUList().add(simulator);
+                s.addProducer(simulator);
             }
             else{
                 break;
             }
         }
-        EPGraph.getInstance().AddEPGraphFromList(operators);        
-        g = GraphEditor.getInstance();
+        s.run();
+        //EPGraph.getInstance().AddEPGraphFromList(operators);        
+        //g = GraphEditor.getInstance();
     }
 }

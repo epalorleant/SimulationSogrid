@@ -82,7 +82,7 @@ public class EdgeAnimation<V, E> implements ActionListener {
             vv.repaint();
             lock.notify();
         }
-        phase+=pas;
+        phase+=(5*pas);
     }
     }
 }

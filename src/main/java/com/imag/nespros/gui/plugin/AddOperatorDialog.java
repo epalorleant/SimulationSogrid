@@ -5,8 +5,10 @@
  */
 package com.imag.nespros.gui.plugin;
 
+import com.imag.nespros.Simulation;
 import com.imag.nespros.network.devices.Device;
 import com.imag.nespros.network.routing.EPGraph;
+import com.imag.nespros.runtime.client.EventConsumer;
 import com.imag.nespros.runtime.core.EPUnit;
 import java.util.Iterator;
 import java.util.Vector;
@@ -157,7 +159,15 @@ public class AddOperatorDialog extends javax.swing.JDialog {
 
     private void setOperatorList() {
         Vector<EPUnit> operators = new Vector<>();
-        for (EPUnit epu : EPGraph.getInstance().getGraph().getVertices()) {
+        Vector<EPUnit> allOp = new Vector<>();        
+        Simulation s = GraphEditor.simu;      
+        allOp.addAll(s.getProducers());
+        allOp.addAll(s.getConsumers());
+        for(EventConsumer c: s.getConsumers()){
+             allOp.addAll(c.getEPUList());                            
+        }
+        
+        for (EPUnit epu : allOp) {
             if (!epu.isMapped() && epu.getDevice() == null) {
                 if (epu.getUsedMemory() <= device.getRemainingMemory()) {
                     operators.add(epu);

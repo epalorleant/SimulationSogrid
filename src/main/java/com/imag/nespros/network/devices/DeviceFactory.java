@@ -18,6 +18,7 @@ public class DeviceFactory implements Factory<Device> {
     private static int htaCount = 0;
     private static int sacomutCount = 0;
     private static int utilityCount = 0;
+    private static int paCount =0 ;
     private static DeviceFactory instance = new DeviceFactory();
     private static DeviceType typeToCreate = DeviceType.AMI;
 
@@ -41,6 +42,8 @@ public class DeviceFactory implements Factory<Device> {
                 return new DCDevice("DC_" + dcCount++);
             case UTILITY:
                 return new UtilityDevice("Utility" + utilityCount++);
+            case PA:
+                return new PADevice("PA_"+paCount++);
             default:
                 return new AMIDevice("AMI_" + amiCount++);
         }
@@ -90,11 +93,20 @@ public class DeviceFactory implements Factory<Device> {
         DeviceFactory.utilityCount = utilityCount;
     }
 
+    public static int getPaCount() {
+        return paCount;
+    }
+
+    public static void setPaCount(int paCount) {
+        DeviceFactory.paCount = paCount;
+    }
+
     
     public static void resetCounters() {
         amiCount = 0;
         dcCount = 0;
         htaCount = 0;
         sacomutCount = 0;
+        paCount = 0;
     }
 }

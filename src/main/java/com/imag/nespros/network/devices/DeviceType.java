@@ -18,6 +18,7 @@ public enum DeviceType implements Serializable{
     HTA_COORD("HTA Coordinator"),
     DC("Data Concentrator"), 
     SACOMUT("SACOMUT"),
+    PA("POSTE ASSERVI"),
     UTILITY("Utility");
     
     DeviceType(String name){

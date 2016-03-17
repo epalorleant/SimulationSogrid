@@ -12,6 +12,7 @@ import com.imag.nespros.network.devices.ComLink;
 import com.imag.nespros.network.devices.Device;
 import com.imag.nespros.network.devices.DeviceFactory;
 import com.imag.nespros.network.devices.DeviceType;
+import com.imag.nespros.runtime.client.EventConsumer;
 import com.imag.nespros.runtime.core.EPUnit;
 import edu.uci.ics.jung.visualization.VisualizationViewer;
 import java.awt.event.ActionEvent;
@@ -103,8 +104,19 @@ public class MyMouseMenus {
                 this.add(new JMenuItem("No Operator"));
             }
             else{
-                for(EPUnit epu: v.getOperators()){
-                   this.add(new JMenuItem(epu.getInfo()));
+                for(final EPUnit epu: v.getOperators()){
+                    JMenuItem epuMenu = new JMenuItem(epu.getInfo());
+                    if(epu instanceof EventConsumer){
+                         epuMenu.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            GraphEditor.showEPGraph(((EventConsumer)epu).getGraph());
+                        }
+                    });
+                    }
+                   
+                   this.add(epuMenu);
                 }
             }                       
         }
@@ -175,6 +187,8 @@ public class MyMouseMenus {
             sensor.addActionListener(new MyMouseMenus.CustomAction(DeviceType.SACOMUT));
             JRadioButtonMenuItem dc = new JRadioButtonMenuItem("Data Concentrator");
             dc.addActionListener(new MyMouseMenus.CustomAction(DeviceType.DC));
+            JRadioButtonMenuItem pa = new JRadioButtonMenuItem("Poste Asservi");
+            pa.addActionListener(new MyMouseMenus.CustomAction(DeviceType.PA));
             JRadioButtonMenuItem htaCoord = new JRadioButtonMenuItem("HTA Coordinator");
             htaCoord.addActionListener(new MyMouseMenus.CustomAction(DeviceType.HTA_COORD));
             JRadioButtonMenuItem utility = new JRadioButtonMenuItem("Utility Device");
@@ -184,12 +198,14 @@ public class MyMouseMenus {
             group.add(dc);
             group.add(htaCoord);
             group.add(utility);
+            group.add(pa);
             meter.setSelected(true);
             this.add(meter);
             this.add(sensor);
             this.add(dc);
             this.add(htaCoord);
             this.add(utility);
+            this.add(pa);
         }
     }
 
@@ -358,7 +374,6 @@ public class MyMouseMenus {
 
             });
         }
-
     }
 
      public static class RemoveOperatorItem extends JMenuItem implements VertexMenuListener<Device>,

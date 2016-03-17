@@ -32,19 +32,22 @@ public class EventProducer extends EPUnit {
     private final Class _clazz;
     private final String _topicName;
     private final IOTerminal output;
+    private  String _eventTypeName;
     protected long delay;
     
     // for graphic control
     protected long definedDelay;
 
-    public EventProducer(String name, String typeName, Class clazz) {
+    public EventProducer(String name, Class clazz) {
         super(name);
         _clazz = clazz;
-        _topicName = typeName;
+         _eventTypeName = clazz.getSimpleName();
+        _topicName = _eventTypeName+"@"+name;
         if (clazz != null) {
-            declareEventType(typeName, clazz);
+            declareEventType(_topicName, clazz);
         }
         _type = "Producer";
+       
         output = new IOTerminal(_topicName, _topicName, null, this);
         setUsedMemory(0);
         setExecutionTime(0);
@@ -58,6 +61,10 @@ public class EventProducer extends EPUnit {
         } else {
             return true;
         }
+    }
+
+    public String getEventTypeName() {
+        return _eventTypeName;
     }
 
     /**
@@ -74,6 +81,7 @@ public class EventProducer extends EPUnit {
         else 
             throw new NullPointerException("event is null");
     }
+    
 
     /**
      * construct an event bean using the given event object

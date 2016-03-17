@@ -7,11 +7,13 @@ package com.imag.nespros.runtime.client;
 import com.imag.nespros.network.routing.Subscriber;
 import com.imag.nespros.network.routing.Topic2Device;
 import com.imag.nespros.runtime.core.EPUnit;
+import com.imag.nespros.runtime.core.EventChannel;
 import com.imag.nespros.runtime.core.IOTerminal;
 import com.imag.nespros.runtime.event.EventBean;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
-
 
 /**
  *
@@ -19,32 +21,31 @@ import java.util.Collection;
  */
 public class EventConsumer extends EPUnit implements Subscriber {
 
-    String _info, _input;
+    String _input;
     AnEventHandler _handler;
-
+    private ArrayList<EPUnit> epuList;
+    DirectedSparseGraph<EPUnit, EventChannel> graph;
+    
     public EventConsumer(String _info, String _inputTerm) {
+        this(_info);
+        this._input = _inputTerm;        
+    }
+
+    public EventConsumer(String _info) {
         super(_info);
-        this._info = _info;
-        this._input = _inputTerm;
+        this.setExecutionTime(0);
+        this.setUsedMemory(0);
         _type = "Consumer";
+        epuList = new ArrayList<>();
+        graph = new DirectedSparseGraph<>();
     }
 
     public EventConsumer(String info, String IDinputTerminal, AnEventHandler handler) {
-        super(info);
+        this(info);
         _handler = handler;
         _handler.setConsumer(this);
-        this.setExecutionTime(0);
-        //try {
-            _info = info;
-            _input = IDinputTerminal;
-            _type = "Consumer";
-//            if (handler != null && this.getDevice() != null) {
-//                this.getDevice().getPubSubService().subscribe(this, _input);
-//
-//            }
-      //  } catch (Exception ex) {
-        //    Logger.getLogger(EventConsumer.class.getName()).log(Level.SEVERE, null, ex);
-      //  }
+        _input = IDinputTerminal;
+
     }
 
     @Override
@@ -52,8 +53,12 @@ public class EventConsumer extends EPUnit implements Subscriber {
         EventBean[] evts = (EventBean[]) event;
         for (EventBean evt : evts) {
             evt.getHeader().setReceptionTime(System.currentTimeMillis());
-            if(evt.payload.contains("#time#")) evt.payload.remove("#time#");
-            if(evt.payload.contains("processTime")) evt.payload.remove("processTime");
+            if (evt.payload.contains("#time#")) {
+                evt.payload.remove("#time#");
+            }
+            if (evt.payload.contains("processTime")) {
+                evt.payload.remove("processTime");
+            }
         }
         _handler.notify(evts);
     }
@@ -82,13 +87,77 @@ public class EventConsumer extends EPUnit implements Subscriber {
     @Override
     public void run() {
     }
-  
+
     @Override
-    public boolean openIOchannels() {        
+    public boolean openIOchannels() {
         Topic2Device.getInstance().AddMapping(_input, getDevice());
         this.getDevice().getPubSubService().subscribe(this, _input);
         return true;
     }
+
+    public void subscribe(String inputTerm) {
+        _input = inputTerm;
+    }
+
+    public AnEventHandler getHandler() {
+        return _handler;
+    }
+
+    public void setHandler(AnEventHandler _handler) {
+        this._handler = _handler;
+    }
+
+    public String getInput() {
+        return _input;
+    }
+
+    public ArrayList<EPUnit> getEPUList() {
+        return epuList;
+    }
+
+    public void buildESCNetwork(Graph expr) {
+
+    }
+
+    public DirectedSparseGraph<EPUnit, EventChannel> getGraph() {
+        return graph;
+    }
     
+    public void resetMapping(){
+        for(EPUnit epu: graph.getVertices()){
+            epu.setDevice(null);
+            epu.setMapped(false);
+        }
+        
+    }
     
+    public void buildCompositionGraph(ArrayList<EventProducer> producers) {
+        ArrayList<EPUnit> AllOperators = new ArrayList<>();
+        AllOperators.addAll(epuList);
+        AllOperators.addAll(producers);
+        AllOperators.add(this);
+        for (EPUnit op : AllOperators) {
+            graph.addVertex(op);
+        }
+        for (EPUnit op : AllOperators) {
+            if (op.getOutputTerminal() != null) {
+                for (EPUnit opDest : AllOperators) {
+                    for (IOTerminal inputTerm : opDest.getInputTerminals()) {
+                        String inputTopic = inputTerm.getTopic();
+                        //System.out.println(inputTopic);
+                        if (inputTopic.equals(op.getOutputTopic())) {
+                            EventChannel ec = new EventChannel(inputTopic);
+                            graph.addEdge(ec, op, opDest);                              
+                        }
+                    }
+                }
+            }
+
+        }
+        for(EPUnit op: graph.getVertices()){
+            if((op instanceof EventProducer)&& graph.outDegree(op)==0){
+                graph.removeVertex(op);
+            }             
+        }
+    }
 }

@@ -8,6 +8,7 @@
  */
 package com.imag.nespros.gui.plugin;
 
+import com.imag.nespros.Simulation;
 import com.imag.nespros.gui.transformers.CustomVertexIconTransformer;
 import com.imag.nespros.gui.transformers.CustomVertexShapeTransformer;
 import com.imag.nespros.network.devices.AMIDevice;
@@ -18,6 +19,7 @@ import com.imag.nespros.network.devices.Device;
 import com.imag.nespros.network.devices.DeviceFactory;
 import com.imag.nespros.network.devices.DeviceType;
 import com.imag.nespros.network.devices.HTACoordDevice;
+import com.imag.nespros.network.devices.PADevice;
 import com.imag.nespros.network.devices.SacomutDevice;
 import com.imag.nespros.network.devices.UtilityDevice;
 import com.imag.nespros.network.routing.CustomUndirectedGraph;
@@ -26,6 +28,7 @@ import com.imag.nespros.network.routing.Topology;
 import com.imag.nespros.runtime.algoritms.GraphUtil;
 import com.imag.nespros.runtime.algoritms.OperatorMapping;
 import com.imag.nespros.runtime.algoritms.Solution;
+import com.imag.nespros.runtime.client.EventConsumer;
 import com.imag.nespros.runtime.client.EventProducer;
 import com.imag.nespros.runtime.core.EPUnit;
 import com.imag.nespros.runtime.core.EventChannel;
@@ -64,6 +67,7 @@ import edu.uci.ics.jung.algorithms.layout.CircleLayout;
 import edu.uci.ics.jung.algorithms.layout.DAGLayout;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.algorithms.layout.StaticLayout;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.io.GraphIOException;
 import edu.uci.ics.jung.io.GraphMLWriter;
@@ -83,8 +87,10 @@ import edu.uci.ics.jung.visualization.control.ScalingControl;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.layout.LayoutTransition;
 import edu.uci.ics.jung.visualization.util.Animator;
+import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Paint;
+import java.awt.Stroke;
 import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -94,6 +100,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -104,7 +111,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.apache.commons.collections15.Transformer;
-
 
 /**
  * Shows how to create a graph editor with JUNG. Mouse modes and actions are
@@ -130,6 +136,7 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
     static JFrame frame = new JFrame("Simulator");
     AbstractLayout<Device, ComLink> layout;
     private static GraphEditor demo = null;
+    static Simulation simu = null;
     /**
      * the visual component and renderer for the graph
      */
@@ -189,16 +196,15 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
      * graph.
      *
      */
-    private GraphEditor() {
-        
+    private GraphEditor(Simulation s) {
+        simu = s;
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ex) {
             Logger.getLogger(GraphEditor.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+        }
         // create a simple graph for the demo
-        //graph = new SparseMultigraph<Number,Number>();
-        graph = Topology.getInstance().getGraph();  //new UndirectedSparseGraph<Device, ComLink>();
+        graph = Topology.getInstance().getGraph();
         this.layout = new StaticLayout<Device, ComLink>(graph,
                 new Transformer<Device, Point2D>() {
                     @Override
@@ -213,15 +219,39 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         vv = new VisualizationViewer<Device, ComLink>(layout);
         vv.setBackground(Color.white);
 
-        vv.getRenderContext().setVertexLabelTransformer(MapTransformer.<Device, String>getInstance(
-                LazyMap.<Device, String>decorate(new HashMap<Device, String>(), new ToStringLabeller<Device>())));
-
+        final Transformer<Device, String> vertexLabelTransformer = new Transformer<Device, String>() {
+            @Override
+            public String transform(Device d) {
+                return d.getDeviceName();
+            }
+        };
+        
+        //vv.getRenderContext().setVertexLabelTransformer(MapTransformer.<Device, String>getInstance(
+          //      LazyMap.<Device, String>decorate(new HashMap<Device, String>(), new ToStringLabeller<Device>())));
+        vv.getRenderContext().setVertexLabelTransformer(vertexLabelTransformer);
         vv.getRenderContext().setEdgeLabelTransformer(new Transformer<ComLink, String>() {
             @Override
             public String transform(ComLink link) {
                 return (link.getID() + ", " + link.getLatency());
             }
         });
+        float dash[] = {0.1f};
+        final Stroke edgeStroke = new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 1.0f);
+        final Transformer<ComLink, Stroke> edgeStrokeTransformer = new Transformer<ComLink, Stroke>() {
+            @Override
+            public Stroke transform(ComLink l) {
+                return edgeStroke;
+            }
+        };
+        Transformer<ComLink, Paint> edgePaint = new Transformer<ComLink, Paint>() {
+            public Paint transform(ComLink l) {
+                if(l.isDown())
+                return Color.RED;
+                else return Color.BLACK;
+            }
+        };
+        vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
+        //vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
         vv.setVertexToolTipTransformer(vv.getRenderContext().getVertexLabelTransformer());
         vv.getRenderContext().setVertexIconTransformer(new CustomVertexIconTransformer());
         vv.getRenderContext().setVertexShapeTransformer(new CustomVertexShapeTransformer());
@@ -323,19 +353,45 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         deploy.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // OPMapping algo here
-                System.out.println("-- Operator placement algorithm Greedy --");
+                if (simu == null) {
+                    return;
+                }
                 GraphUtil<Device, ComLink> util = new GraphUtil<>();
-                Solution init = util.initialMapping(EPGraph.getInstance().getGraph());
-                System.out.println("Initial Mapping: " + init);
-                OperatorMapping mapper = new OperatorMapping();
-                long T1, T2;
-                System.out.println("--- OpMapping Algo Greedy --- ");
-                T1 = System.currentTimeMillis();
-                Solution solution = mapper.opMapping(EPGraph.getInstance().getGraph(),
-                        Topology.getInstance().getGraph(), init);
-                T2 = System.currentTimeMillis();
-                System.out.println(solution);
-                System.out.println("Solution founded in: " + (T2 - T1) + " ms");
+                for (EventProducer p : simu.getProducers()) {
+                    if (!p.isMapped()) {
+                        JOptionPane.showMessageDialog(frame, "Cannot map operators. Please deploy the producer: " + p.getName());
+                        return;
+                    }
+                }
+                for (EventConsumer c : simu.getConsumers()) {
+                    if (!c.isMapped()) {
+                        JOptionPane.showMessageDialog(frame, "Cannot map operators. Please deploy the consumer: " + c.getName());
+                        return;
+                    }
+                    System.out.println("-- Operator placement algorithm Greedy: " + c.getName() + " --");
+                    Solution init = util.initialMapping(c.getGraph());
+                    System.out.println(c.getGraph() + "\nInitial Mapping: " + init);
+                    OperatorMapping mapper = new OperatorMapping();
+                    long T1, T2;
+                    System.out.println("--- OpMapping Algo Greedy --- ");
+                    T1 = System.currentTimeMillis();
+                    Solution solution = mapper.opMapping(c.getGraph(),
+                            Topology.getInstance().getGraph(), init);
+                    T2 = System.currentTimeMillis();
+                    System.out.println(solution);
+                    System.out.println("Solution founded in: " + (T2 - T1) + " ms");
+                }
+//                Solution init = util.initialMapping(EPGraph.getInstance().getGraph());
+//                System.out.println("Initial Mapping: " + init);
+//                OperatorMapping mapper = new OperatorMapping();
+//                long T1, T2;
+//                System.out.println("--- OpMapping Algo Greedy --- ");
+//                T1 = System.currentTimeMillis();
+//                Solution solution = mapper.opMapping(EPGraph.getInstance().getGraph(),
+//                        Topology.getInstance().getGraph(), init);
+//                T2 = System.currentTimeMillis();
+//                System.out.println(solution);
+//                System.out.println("Solution founded in: " + (T2 - T1) + " ms");
                 vv.repaint();
             }
         });
@@ -344,12 +400,15 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
             public void actionPerformed(ActionEvent e) {
                 // run the simulation here
                 System.out.println("Setting the simulation...");
-                for (EPUnit op : EPGraph.getInstance().getGraph().getVertices()) {
-                    if (op.isMapped()) {
-                        op.openIOchannels();
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Cannot run, undeployed operators founded.");
-                        return;
+                for (EventConsumer c : simu.getConsumers()) {
+
+                    for (EPUnit op : c.getGraph().getVertices()) {
+                        if (op.isMapped()) {
+                            op.openIOchannels();
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Cannot run, undeployed operators founded.");
+                            return;
+                        }
                     }
                 }
                 //ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -361,9 +420,11 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                 for (ComLink link : Topology.getInstance().getGraph().getEdges()) {
                     link.start();
                 }
-                for (EPUnit op : EPGraph.getInstance().getGraph().getVertices()) {
-                    if (op.isMapped() && op.getDevice() != null) {
-                        op.start();
+                for (EventConsumer c : simu.getConsumers()) {
+                    for (EPUnit op : c.getGraph().getVertices()) {
+                        if (op.isMapped() && op.getDevice() != null && !op.isAlive()) {
+                            op.start();
+                        }
                     }
                 }
 
@@ -424,6 +485,14 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         vv.repaint();
     }
 
+    public Simulation getSimu() {
+        return simu;
+    }
+
+    public void setSimu(Simulation simu) {
+        this.simu = simu;
+    }
+
     private static void initMenu() {
         JMenu menu = new JMenu("File");
         menu.add(new AbstractAction("Make Image") {
@@ -471,7 +540,8 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                 if (option == JFileChooser.APPROVE_OPTION) {
                     File file = chooser.getSelectedFile();
                     try {
-                        EPGraph.getInstance().resetMapping();
+                        //EPGraph.getInstance().resetMapping();
+                        simu.resetMapping();
                         demo.load(file);
                         frame.setTitle("Simulator - " + file.getName());
                     } catch (FileNotFoundException ex) {
@@ -495,10 +565,10 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                 vv.repaint();
             }
         });
-        menu2.add(new AbstractAction("Event Processing Network") {
+        menu2.add(new AbstractAction("Event Composition Networks") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                showEPGraph();
+                showEPGraph(EPGraph.getInstance().getGraph());
             }
         });
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
@@ -509,12 +579,23 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         frame.getContentPane().add(demo);
         frame.pack();
         frame.setVisible(true);
-        showEPGraph();
+        buildEPGraphs();
+        showEPGraph(EPGraph.getInstance().getGraph());
     }
 
-    public static void showEPGraph() {
+    private static void buildEPGraphs() {
+        ArrayList<EPUnit> operators = new ArrayList<>();
+        operators.addAll(simu.getProducers());
+        operators.addAll(simu.getConsumers());
+        for (EventConsumer c : simu.getConsumers()) {
+            operators.addAll(c.getEPUList());
+        }
+        EPGraph.getInstance().AddEPGraphFromList(operators);
+    }
+
+    public static void showEPGraph(DirectedSparseGraph<EPUnit, EventChannel> graph) {
         //System.out.println(EPGraph.getInstance().getGraph());
-        Layout<EPUnit, EventChannel> layout = new DAGLayout<>(EPGraph.getInstance().getGraph());
+        Layout<EPUnit, EventChannel> layout = new DAGLayout<>(graph);
         //Layout<EPUnit, EventChannel> layout = new SpringLayout2<>(EPGraph.getInstance().getGraph());
         layout.setSize(new Dimension(400, 400)); // sets the initial size of the space
         // The BasicVisualizationServer<V,E> is parameterized by the edge types
@@ -549,7 +630,7 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         DefaultModalGraphMouse graphMouse = new DefaultModalGraphMouse();
         vv.setGraphMouse(graphMouse);
         graphMouse.setMode(ModalGraphMouse.Mode.PICKING);
-        JFrame frame = new JFrame("Event Processing Graph");
+        JFrame frame = new JFrame("Event Composition Graph");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().add(vv);
         frame.pack();
@@ -596,11 +677,17 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         }
     }
 
-    public static GraphEditor getInstance() {
+    public static GraphEditor getInstance(Simulation s) {
         if (demo == null) {
-            demo = new GraphEditor();
-            initMenu();
+            demo = new GraphEditor(s);
         }
+        initMenu();
+        //demo.setSimu(s);
+        return demo;
+    }
+
+    public static GraphEditor getInstance() {
+        //demo.setSimu(s);
         return demo;
     }
 
@@ -673,7 +760,7 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         graphWriter.addEdgeData("down", null, "false",
                 new Transformer<ComLink, String>() {
                     public String transform(ComLink e) {
-                        return e.isDown()+"";
+                        return e.isDown() + "";
                     }
                 }
         );
@@ -711,7 +798,11 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                         } else if (metadata.getProperty("deviceType").equals("Utility")) {
                             v = new UtilityDevice(deviceName, cpuSpeeed, totalMemory);
                             DeviceFactory.setUtilityCount(DeviceFactory.getUtilityCount() + 1);
-                        } else {
+                        }else if (metadata.getProperty("deviceType").equals("POSTE ASSERVI")) {
+                            v = new PADevice(deviceName, cpuSpeeed, totalMemory);
+                            DeviceFactory.setPaCount(DeviceFactory.getPaCount() + 1);
+                        }
+                        else {
                             v = new DCDevice(deviceName, cpuSpeeed, totalMemory);
                             DeviceFactory.setDcCount(DeviceFactory.getDcCount() + 1);
                         }
@@ -782,14 +873,4 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         //vv.getModel().setGraphLayout(l);
         vv.repaint();
     }
-
-    /**
-     * a driver for this demo
-     *
-     * @SuppressWarnings("serial") public static void main(String[] args) {
-     * //Sim_system.initialise();
-     *
-     * }
-     *
-     */
 }
