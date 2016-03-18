@@ -104,8 +104,11 @@ public class FollowedByAgent extends EPUnit {
                             case EPUnit.SUM:
                                 ec.getHeader().setPriority((short)(l.getHeader().getPriority()+ r.getHeader().getPriority()));
                                 break;
-                            default: //avg
+                            case EPUnit.AVG:                            
                                 ec.getHeader().setPriority((short) ((l.getHeader().getPriority()+ r.getHeader().getPriority())/2));
+                                break;
+                            default: //constant
+                                ec.getHeader().setPriority(Short.parseShort(getPriorityFunction()));
                                 break;
                         }
                         

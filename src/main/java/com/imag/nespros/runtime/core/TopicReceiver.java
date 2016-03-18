@@ -53,7 +53,7 @@ public class TopicReceiver implements Subscriber {
             evt.payload.put("processTime", ntime);
             evt.payload.put("flag", flag);
             //System.out.println("ProducerID:"+evt.getHeader().getProducerID()+"; type:"+evt.getHeader().getTypeIdentifier()+"; latency: "+ (evt.getHeader().getReceptionTime()-evt.getHeader().getProductionTime()) );
-            _epAgent.getSourceStream().next(evt);
+            _epAgent.getSourceStream().onNext(evt);
             //_inputQueue.put(evt); 
         }
 

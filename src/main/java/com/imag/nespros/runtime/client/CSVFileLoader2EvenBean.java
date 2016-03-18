@@ -107,10 +107,10 @@ public class CSVFileLoader2EvenBean {
     
      public EventBean getNext() throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
-        String line = input.readLine();
+        String line = input.readLine();        
         if (line != null) {
             EventBean bean = new EventBean();
-            StringTokenizer tokenizer = new StringTokenizer(line, ",");
+            StringTokenizer tokenizer = new StringTokenizer(line, ", ");
             int i = 0;
             while (tokenizer.hasMoreTokens()) {
                 String token = tokenizer.nextToken();

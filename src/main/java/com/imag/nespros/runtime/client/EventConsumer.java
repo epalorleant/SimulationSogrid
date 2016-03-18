@@ -25,10 +25,10 @@ public class EventConsumer extends EPUnit implements Subscriber {
     AnEventHandler _handler;
     private ArrayList<EPUnit> epuList;
     DirectedSparseGraph<EPUnit, EventChannel> graph;
-    
+
     public EventConsumer(String _info, String _inputTerm) {
         this(_info);
-        this._input = _inputTerm;        
+        this._input = _inputTerm;
     }
 
     public EventConsumer(String _info) {
@@ -122,15 +122,15 @@ public class EventConsumer extends EPUnit implements Subscriber {
     public DirectedSparseGraph<EPUnit, EventChannel> getGraph() {
         return graph;
     }
-    
-    public void resetMapping(){
-        for(EPUnit epu: graph.getVertices()){
+
+    public void resetMapping() {
+        for (EPUnit epu : graph.getVertices()) {
             epu.setDevice(null);
             epu.setMapped(false);
         }
-        
+
     }
-    
+
     public void buildCompositionGraph(ArrayList<EventProducer> producers) {
         ArrayList<EPUnit> AllOperators = new ArrayList<>();
         AllOperators.addAll(epuList);
@@ -140,24 +140,27 @@ public class EventConsumer extends EPUnit implements Subscriber {
             graph.addVertex(op);
         }
         for (EPUnit op : AllOperators) {
-            if (op.getOutputTerminal() != null) {
+            if (!(op instanceof EventConsumer)) {
                 for (EPUnit opDest : AllOperators) {
+                    if (op == opDest) {
+                        continue;
+                    }
                     for (IOTerminal inputTerm : opDest.getInputTerminals()) {
                         String inputTopic = inputTerm.getTopic();
-                        //System.out.println(inputTopic);
+                        //System.out.println("ici: " + inputTopic + "$ " + op);
                         if (inputTopic.equals(op.getOutputTopic())) {
                             EventChannel ec = new EventChannel(inputTopic);
-                            graph.addEdge(ec, op, opDest);                              
+                            graph.addEdge(ec, op, opDest);
                         }
                     }
                 }
             }
 
         }
-        for(EPUnit op: graph.getVertices()){
-            if((op instanceof EventProducer)&& graph.outDegree(op)==0){
+        for (EPUnit op : graph.getVertices()) {
+            if ((op instanceof EventProducer) && graph.outDegree(op) == 0) {
                 graph.removeVertex(op);
-            }             
+            }
         }
     }
 }

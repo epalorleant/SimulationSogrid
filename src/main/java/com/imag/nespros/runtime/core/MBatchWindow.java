@@ -7,10 +7,10 @@ package com.imag.nespros.runtime.core;
 import com.google.common.collect.Queues;
 import com.imag.nespros.runtime.event.EventBean;
 
-import hu.akarnokd.reactive4java.base.Observable;
-import hu.akarnokd.reactive4java.reactive.Reactive;
-import hu.akarnokd.reactive4java.util.ObserverAdapter;
+
 import java.util.Queue;
+import rx.Observable;
+import rx.Observer;
 
 
 /**
@@ -32,22 +32,23 @@ public class MBatchWindow extends WindowHandler {
     public void register(EPUnit agent) {
         //  _wagent = agent;
         _agent = agent;
-        Observable<Observable<EventBean>> windows = Reactive.window(_agent.getSourceStream(), _size, skip);
+        Observable<Observable<EventBean>> windows = _agent.getSourceStream().window(_size, skip);
+        //Observable<Observable<EventBean>> windows = Reactive.window(_agent.getSourceStream(), _size, skip);
 
-        windows.register(new ObserverAdapter<Observable<EventBean>>() {
+        windows.subscribe(new Observer<Observable<EventBean>>() {
             @Override
-            public void next(Observable<EventBean> aWindow) {
+            public void onNext(Observable<EventBean> aWindow) {
 
-                aWindow.register(new ObserverAdapter<EventBean>() {
+                aWindow.subscribe(new Observer<EventBean>() {
                     //PriorityQueue<EventBean> res = new PriorityQueue<>(1000, new EventComparator());
                     Queue<EventBean> res = Queues.newArrayDeque();
                     @Override
-                    public void next(EventBean evt) {
+                    public void onNext(EventBean evt) {
                         res.add(evt);
                     }
 
                     @Override
-                    public void finish() {
+                    public void onCompleted() {
                         if (!res.isEmpty()) {
                             EventBean[] evts;
                             evts = res.toArray(new EventBean[0]);
@@ -70,7 +71,22 @@ public class MBatchWindow extends WindowHandler {
                             _agent.getInputQueue().put(evt);
                         }
                     }
+
+                    @Override
+                    public void onError(Throwable thrwbl) {
+                        
+                    }
                 });
+            }
+
+            @Override
+            public void onCompleted() {
+                
+            }
+
+            @Override
+            public void onError(Throwable thrwbl) {
+               
             }
         });
     }

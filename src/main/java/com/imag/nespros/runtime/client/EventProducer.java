@@ -34,6 +34,7 @@ public class EventProducer extends EPUnit {
     private final IOTerminal output;
     private  String _eventTypeName;
     protected long delay;
+    private String producerID;
     
     // for graphic control
     protected long definedDelay;
@@ -47,7 +48,7 @@ public class EventProducer extends EPUnit {
             declareEventType(_topicName, clazz);
         }
         _type = "Producer";
-       
+       producerID = name;
         output = new IOTerminal(_topicName, _topicName, null, this);
         setUsedMemory(0);
         setExecutionTime(0);
@@ -80,6 +81,14 @@ public class EventProducer extends EPUnit {
         }
         else 
             throw new NullPointerException("event is null");
+    }
+
+    public String getProducerID() {
+        return producerID;
+    }
+
+    public void setProducerID(String producerID) {
+        this.producerID = producerID;
     }
     
 

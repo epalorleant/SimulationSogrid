@@ -26,7 +26,7 @@ public class ConjunctionAgent extends EPUnit {
     //IOTerminal inputTerminalR;
     IOTerminal outputTerminal;
 
-    public ConjunctionAgent(String info, String[] IDinputTerminals, String IDinputTerminalR, String IDoutputTerminal) {
+    public ConjunctionAgent(String info, String[] IDinputTerminals, String IDoutputTerminal) {
 
         super(info);
         this._info = info;
@@ -61,7 +61,6 @@ public class ConjunctionAgent extends EPUnit {
 
     @Override
     public void process() {
-
         EventBean[] Values = new EventBean[1];
         ArrayList<ArrayList<EventBean>> inValues = new ArrayList<>();
         // statistics: #events processed, processing time
@@ -109,7 +108,7 @@ public class ConjunctionAgent extends EPUnit {
                     }
                     // for (EventBean r : rValues) {
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+                    ec.getHeader().setDetectionTime(getDetectionTime(evts));
                     ec.getHeader().setIsComposite(true);
                     ec.getHeader().setProductionTime(System.currentTimeMillis());
                     ec.getHeader().setProducerID(this.getName());
@@ -127,8 +126,11 @@ public class ConjunctionAgent extends EPUnit {
                         case EPUnit.SUM:
                             ec.getHeader().setPriority(PFunction.sumPriority(evts));
                             break;
-                        default: //avg
+                        case EPUnit.AVG: //avg
                             ec.getHeader().setPriority(PFunction.avgPriority(evts));
+                            break;
+                        default: //constant
+                            ec.getHeader().setPriority(Short.parseShort(getPriorityFunction()));
                             break;
                     }
                     _outputQueue.put(ec);
@@ -143,9 +145,9 @@ public class ConjunctionAgent extends EPUnit {
                         Collections.sort(inValue, new EventComparator2());
                         evts[i] = inValue.get(0);
                         i++;
-                    }                                        
+                    }
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+                    ec.getHeader().setDetectionTime(getDetectionTime(evts));
 
                     switch (getPriorityFunction()) {
                         case EPUnit.MAX:
@@ -182,7 +184,7 @@ public class ConjunctionAgent extends EPUnit {
                         i++;
                     }
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+                    ec.getHeader().setDetectionTime(getDetectionTime(evts));
                     switch (getPriorityFunction()) {
                         case EPUnit.MAX:
                             ec.getHeader().setPriority(PFunction.maxPriority(evts));
@@ -196,7 +198,7 @@ public class ConjunctionAgent extends EPUnit {
                         default: //avg
                             ec.getHeader().setPriority(PFunction.avgPriority(evts));
                             break;
-                    }                    
+                    }
                     ec.getHeader().setIsComposite(true);
                     ec.getHeader().setProductionTime(System.currentTimeMillis());
                     ec.getHeader().setProducerID(this.getName());
@@ -211,15 +213,15 @@ public class ConjunctionAgent extends EPUnit {
                 break;
 
                 default: { /// mode recent
-                     EventBean[] evts = new EventBean[inputTerminals.length];
+                    EventBean[] evts = new EventBean[inputTerminals.length];
                     int i = 0;
                     for (ArrayList<EventBean> inValue : inValues) {
                         Collections.sort(inValue, new EventComparator2());
-                        evts[i] = inValue.get(inValue.size()-1);
+                        evts[i] = inValue.get(inValue.size() - 1);
                         i++;
-                    }                  
+                    }
                     EventBean ec = new EventBean();
-                    ec.getHeader().setDetectionTime(System.currentTimeMillis());
+                    ec.getHeader().setDetectionTime(getDetectionTime(evts));
 
                     switch (getPriorityFunction()) {
                         case EPUnit.MAX:
@@ -234,7 +236,7 @@ public class ConjunctionAgent extends EPUnit {
                         default: //avg
                             ec.getHeader().setPriority(PFunction.avgPriority(evts));
                             break;
-                    }  
+                    }
                     // ec.getHeader().setPriority((short) Math.max(lV[lV.length - 1].getHeader().getPriority(), rV[rV.length - 1].getHeader().getPriority()));
                     ec.getHeader().setIsComposite(true);
                     ec.getHeader().setProductionTime(System.currentTimeMillis());

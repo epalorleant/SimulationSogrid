@@ -6,11 +6,9 @@
 package com.imag.nespros.runtime.core;
 
 import com.imag.nespros.runtime.event.EventBean;
-import com.imag.nespros.runtime.event.EventComparator2;
 import com.imag.nespros.runtime.logging.MyLogger;
 import com.imag.nespros.runtime.qosmonitor.QoSTuner;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**

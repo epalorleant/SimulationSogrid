@@ -235,8 +235,9 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                 return (link.getID() + ", " + link.getLatency());
             }
         });
-        float dash[] = {0.1f};
-        final Stroke edgeStroke = new BasicStroke(5.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 1.0f);
+        //float dash[] = {0.1f};
+        //final Stroke edgeStroke = new BasicStroke(3.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 1.0f);
+        final Stroke edgeStroke = new BasicStroke(3.0f);
         final Transformer<ComLink, Stroke> edgeStrokeTransformer = new Transformer<ComLink, Stroke>() {
             @Override
             public Stroke transform(ComLink l) {
@@ -251,7 +252,7 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
             }
         };
         vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
-        //vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
+        vv.getRenderContext().setEdgeStrokeTransformer(edgeStrokeTransformer);
         vv.setVertexToolTipTransformer(vv.getRenderContext().getVertexLabelTransformer());
         vv.getRenderContext().setVertexIconTransformer(new CustomVertexIconTransformer());
         vv.getRenderContext().setVertexShapeTransformer(new CustomVertexShapeTransformer());
@@ -597,11 +598,11 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         //System.out.println(EPGraph.getInstance().getGraph());
         Layout<EPUnit, EventChannel> layout = new DAGLayout<>(graph);
         //Layout<EPUnit, EventChannel> layout = new SpringLayout2<>(EPGraph.getInstance().getGraph());
-        layout.setSize(new Dimension(400, 400)); // sets the initial size of the space
+        layout.setSize(new Dimension(800, 600)); // sets the initial size of the space
         // The BasicVisualizationServer<V,E> is parameterized by the edge types
         VisualizationViewer<EPUnit, EventChannel> vv
                 = new VisualizationViewer<>(layout);
-        vv.setPreferredSize(new Dimension(450, 450)); //Sets the viewing area size
+        vv.setPreferredSize(new Dimension(850, 650)); //Sets the viewing area size
         vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller() {
             @Override
             public String transform(Object v) {

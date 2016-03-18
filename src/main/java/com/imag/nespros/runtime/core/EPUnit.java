@@ -12,14 +12,14 @@ import com.imag.nespros.runtime.event.EventBean;
 import com.imag.nespros.runtime.logging.MyLogger;
 import com.imag.nespros.runtime.qosmonitor.QoSConstraint;
 
-import hu.akarnokd.reactive4java.base.Subject;
-import hu.akarnokd.reactive4java.util.DefaultObservable;
 import java.util.Collection;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import rx.subjects.PublishSubject;
+import rx.subjects.Subject;
 
 //import log.MyLogger;
 
@@ -58,12 +58,12 @@ public abstract class EPUnit extends Thread {
     private int usedMemory;
     // operator mapoped?
     private boolean mapped;
-    public static final short MAX= 0;
-    public static final short MIN= 1;
-    public static final short AVG= 2;
-    public static final short SUM= 3;
+    public static final String MAX= "max";
+    public static final String MIN= "min";
+    public static final String AVG= "avg";
+    public static final String SUM= "sum";
     
-    protected short priorityFunction = 0;
+    protected String priorityFunction = "max";
     
     public EPUnit(String info) {
         super(info);
@@ -76,15 +76,15 @@ public abstract class EPUnit extends Thread {
         qosConstraint = new QoSConstraint();
         executorService = Executors.newCachedThreadPool();
         _handler = new BatchNWindow(1);
-        _sourceStream = new DefaultObservable<>();
+        _sourceStream = PublishSubject.create();
         mapped = false;
     }
 
-    public short getPriorityFunction() {
+    public String getPriorityFunction() {
         return priorityFunction;
     }
 
-    public void setPriorityFunction(short priorityFunction) {
+    public void setPriorityFunction(String priorityFunction) {
         this.priorityFunction = priorityFunction;
     }
 
@@ -128,6 +128,15 @@ public abstract class EPUnit extends Thread {
 
     public abstract void process();
 
+    public long getDetectionTime(EventBean [] evts){
+        long time = Long.MAX_VALUE;
+        for(EventBean e:evts){
+            if(e.getHeader().getDetectionTime()< time){
+                time = e.getHeader().getDetectionTime();
+            }
+        }
+        return time;
+    }
     public boolean fetch() {
         try {           
               _selectedEvents.add((EventBean) this.getInputQueue().take());                        
@@ -142,11 +151,6 @@ public abstract class EPUnit extends Thread {
         for (IOTerminal input : getInputTerminals()) {
             input.open();
         }
-
-       // IOTerminal outputTerm = getOutputTerminal();
-       // if(outputTerm != null){
-        //    outputTerm.open();
-       // }
         return true;
     }
 
@@ -154,9 +158,10 @@ public abstract class EPUnit extends Thread {
     public void run() {
         registerWindowHandler();
         while (true) {
-            if (fetch()) {
-                process();
-            }
+            //if (fetch()) {
+            fetch();    
+            process();
+            //}
         }
     }
 
@@ -204,19 +209,6 @@ public abstract class EPUnit extends Thread {
     public void setReceivers(TopicReceiver[] _receivers) {
         this._receivers = _receivers;
     }
-
-//    public void setWindow(List<WindowHandler> handlers) {
-//        for (int i = 0; i < getInputTerminals().size(); i++) {
-//            _receivers[i].setWindowHandler(handlers.get(i));
-//            //_receivers[i].registerWindowHandler();
-//        }
-//    }
-
-//    private void registerWindowHandler() {
-//        for (int i = 0; i < getInputTerminals().size(); i++) {
-//            _receivers[i].registerWindowHandler();
-//        }
-//    }
 
         public BoundedPriorityBlockingQueue getInputQueue() {
         return _inputQueue;

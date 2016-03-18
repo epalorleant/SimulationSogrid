@@ -100,8 +100,8 @@ public class FilterAgent extends EPUnit {
                 ntime = (long) e.getValue("processTime");
                 
                 for (Func1<EventBean, Boolean> _filter : _filters) {
-                    if (_filter.invoke(e)) {
-                        pass_filters = true;
+                    if (!_filter.invoke(e)) {
+                        pass_filters = false;
                         break;
                     }
                 }

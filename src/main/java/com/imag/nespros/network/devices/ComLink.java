@@ -150,7 +150,7 @@ public class ComLink extends Thread {
     public void setDown(boolean down) {
         this.down = down;
     }
-   
+
     public void putPacket(DataPacket packet) {
         try {
             //System.out.println("sending packet via " + ID);
@@ -161,7 +161,7 @@ public class ComLink extends Thread {
     }
 
     protected boolean send(DataPacket packet) {
-        if(isDown()){
+        if (isDown()) {
             return false;
         }
         packet.setInputLink(this);
@@ -171,23 +171,26 @@ public class ComLink extends Thread {
             tried++;
         }
         int currentLatency = (int) Math.floor(normalDist.nextDouble()) + overhead;
+        if (currentLatency <= 0) {
+            currentLatency = overhead + latency;
+        }
         Object lock = new Object();
         // The communication can be in both direction, compute the right direction of the packet
         int direction = getDirection(packet);
-        logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried+", "+pendingPackets.size());
+        logger.log(System.currentTimeMillis() + ", " + currentLatency + ", " + tried + ", " + pendingPackets.size());
         try {
             synchronized (lock) {
                 if (direction == 0) { // the default edge direction, send the event on the direct direction
                     Device d = Topology.getInstance().getGraph().getDest(this);
                     showMessageAnimation(direction, currentLatency, lock, packet.getColor());
                     lock.wait();
-                    d.receiveEventPacket(packet);                    
+                    d.receiveEventPacket(packet);
                 } else { //the opposite direction
                     Device d = Topology.getInstance().getGraph().getSource(this);
                     showMessageAnimation(direction, currentLatency, lock, packet.getColor());
                     lock.wait();
                     d.receiveEventPacket(packet);
-                }                
+                }
             }
         } catch (InterruptedException ex) {
             return false;

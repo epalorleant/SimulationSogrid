@@ -105,7 +105,7 @@ public class AggregatorAgent extends EPUnit {
         avgPriority = (short) (sumPriority / operands.length);
 
         EventBean ec = new EventBean();
-        ec.getHeader().setDetectionTime(operands[0].getHeader().getDetectionTime());
+        ec.getHeader().setDetectionTime(getDetectionTime(operands));
         ec.getHeader().setIsComposite(true);
         ec.getHeader().setProducerID(this.getName());
         ec.getHeader().setProductionTime(System.currentTimeMillis());
@@ -121,10 +121,14 @@ public class AggregatorAgent extends EPUnit {
             case EPUnit.SUM:
                 ec.getHeader().setPriority(sumPriority);
                 break;
-            default: //avg
+            case EPUnit.AVG: //avg
                 ec.getHeader().setPriority(avgPriority);
                 break;
+            default: //constant
+                ec.getHeader().setPriority(Short.parseShort(getPriorityFunction()));
+                break;
         }
+        
         for (Aggregate aggregator : aggregators) {
             NameValuePair res = aggregator.aggregate(operands);
             ec.payload.put(res.getAttribute(), (Serializable) res.getValue());

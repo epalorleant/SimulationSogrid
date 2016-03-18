@@ -17,6 +17,7 @@ import com.imag.nespros.runtime.core.DisjunctionAgent;
 import com.imag.nespros.runtime.core.EPUnit;
 import com.imag.nespros.runtime.core.FilterAgent;
 import com.imag.nespros.runtime.core.GreatherOrEqualFilter;
+import com.imag.nespros.runtime.core.SlidingWindow;
 import com.imag.nespros.runtime.core.TimeBatchWindow;
 import com.imag.nespros.samples.consumer.Consumer;
 import com.imag.nespros.samples.event.MeterEvent;
@@ -54,9 +55,9 @@ public class Launcher {
         }
         
         Simulation s = new Simulation();      
-        EventConsumer utility = new EventConsumer("Utility","Result", new Consumer());
+        EventConsumer utility = new EventConsumer("Utility","Aggregated", new Consumer());
         //operators.add(utility);   
-        s.addConsumer(utility);
+        
         
         FilterAgent filter = new FilterAgent("FilterA","MeterEvent", "Filtered");
         filter.addFilter(new GreatherOrEqualFilter("realPowerWatts", 1d));
@@ -70,7 +71,7 @@ public class Launcher {
         aggregate.setExecutionTime(1000);
         aggregate.setUsedMemory(50);
         utility.getEPUList().add(aggregate);
-        
+        /*
         FilterAgent filterB = new FilterAgent("FilterB","Filtered", "FilteredB");
         filterB.addFilter(new GreatherOrEqualFilter("realPowerWatts", 2d));
         filterB.setExecutionTime(1);
@@ -83,17 +84,18 @@ public class Launcher {
         orAgent.setUsedMemory(15);
         utility.getEPUList().add(orAgent);
         //orAgent.setWindowHandler(new TimeBatchWindow(5, TimeUnit.SECONDS));
-        
+        */
         
          //operators.add(orAgent);
          //operators.add(filterB);        
         //operators.add(aggregate);
         //operators.add(filter);
        
+       
          ResourceLoader r = new ResourceLoader();
         //File folder = new File(Thread.currentThread().getContextClassLoader().getResource(path).getFile());//r.getRessource(path);
         String[] listOfFiles = r.listFiles(path); 
-       
+       String[] inputOr = new String[NUMBER];
         for (int i = 0; i < listOfFiles.length; i++) {
             if ( i < NUMBER) {                                              
                 MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"MeterEvent", 
@@ -103,12 +105,19 @@ public class Launcher {
                 simulator.setMapped(false); 
                 //utility.getEPUList().add(simulator);
                 s.addProducer(simulator);
+                inputOr[i]= simulator.getOutputTopic();
             }
             else{
                 break;
             }
         }
-        s.run();
+         ConjunctionAgent or = new ConjunctionAgent("AND", inputOr, "MeterEvent");
+         or.setUsedMemory(20);
+         or.setExecutionTime(20);
+         or.setWindowHandler(new SlidingWindow(6000, 1000, TimeUnit.MILLISECONDS));
+         utility.getEPUList().add(or);
+         s.addConsumer(utility);
+         s.run();
         //EPGraph.getInstance().AddEPGraphFromList(operators);        
         //g = GraphEditor.getInstance();
     }

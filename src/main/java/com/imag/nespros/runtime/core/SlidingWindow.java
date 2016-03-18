@@ -7,12 +7,11 @@ package com.imag.nespros.runtime.core;
 import com.google.common.collect.Queues;
 import com.imag.nespros.runtime.event.EventBean;
 
-import hu.akarnokd.reactive4java.base.Observable;
-import hu.akarnokd.reactive4java.reactive.Reactive;
-import hu.akarnokd.reactive4java.util.ObserverAdapter;
 
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
+import rx.Observable;
+import rx.Observer;
 
 
 /**
@@ -39,22 +38,23 @@ public class SlidingWindow extends WindowHandler {
         //  _wagent = agent;
         _agent = agent;
 
-        Observable<Observable<EventBean>> windows = Reactive.window(_agent.getSourceStream(), _timespan, _timeshift, _unit);
+        Observable<Observable<EventBean>> windows = _agent.getSourceStream().window(_timespan, _timeshift, _unit);
+        //Observable<Observable<EventBean>> windows = Reactive.window(_agent.getSourceStream(), _timespan, _timeshift, _unit);
 
-        windows.register(new ObserverAdapter<Observable<EventBean>>() {
+        windows.subscribe(new Observer<Observable<EventBean>>() {
             @Override
-            public void next(Observable<EventBean> aWindow) {
-
-                aWindow.register(new ObserverAdapter<EventBean>() {
+            public void onNext(Observable<EventBean> aWindow) {
+                
+                aWindow.subscribe(new Observer<EventBean>() {
                     //PriorityQueue<EventBean> res = new PriorityQueue<>(1000, new EventComparator());
                     Queue<EventBean> res = Queues.newArrayDeque();
                     @Override
-                    public void next(EventBean evt) {
+                    public void onNext(EventBean evt) {
                         res.add(evt);
                     }
 
                     @Override
-                    public void finish() {
+                    public void onCompleted() {
                         if (!res.isEmpty()) {
                             if (!_agent.getType().equals("Negation")) {
                                 EventBean[] evts;
@@ -63,6 +63,7 @@ public class SlidingWindow extends WindowHandler {
                                 EventBean evt = new EventBean();
                                 evt.payload.put("window", evts);
                                 evt.getHeader().setTypeIdentifier("Window");
+                                //evt.getHeader().setPriority((short)1);
                                 _agent.getInputQueue().put(evt);
                             }
                         } else {
@@ -74,8 +75,23 @@ public class SlidingWindow extends WindowHandler {
                                 _agent.getInputQueue().put(evt);
                             }
                         }
+                    }                   
+
+                    @Override
+                    public void onError(Throwable thrwbl) {
+                        
                     }
                 });
+            }
+
+            @Override
+            public void onCompleted() {
+                
+            }
+
+            @Override
+            public void onError(Throwable thrwbl) {
+               
             }
         });
     }
