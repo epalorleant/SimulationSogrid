@@ -129,6 +129,7 @@ public class GraphUtil<V, E> {
         UndirectedSparseGraph<V, E> subgraph;
         subgraph = new UndirectedSparseGraph<>();
         subgraph.addVertex(nodeFrom);
+        subgraph.addVertex(nodeTo);
         PathFinder<V, E> pathFinder = new PathFinder<>(graph);
         pathFinder.findAllPaths(nodeFrom, nodeTo);
         // special case: if nodeFrom directly connected to nodeTo

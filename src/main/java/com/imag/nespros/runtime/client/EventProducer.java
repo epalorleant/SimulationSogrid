@@ -74,7 +74,7 @@ public class EventProducer extends EPUnit {
      * @param evt
      * @throws Exception
      */
-    public void sendEvent(EventBean evt) throws Exception {
+    public void publish(EventBean evt) throws Exception {
         if (evt != null) {
             EventBean[] evts = {evt};
             output.send(evts);

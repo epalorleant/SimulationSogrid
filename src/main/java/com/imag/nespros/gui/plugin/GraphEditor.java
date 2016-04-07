@@ -225,9 +225,9 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                 return d.getDeviceName();
             }
         };
-        
+
         //vv.getRenderContext().setVertexLabelTransformer(MapTransformer.<Device, String>getInstance(
-          //      LazyMap.<Device, String>decorate(new HashMap<Device, String>(), new ToStringLabeller<Device>())));
+        //      LazyMap.<Device, String>decorate(new HashMap<Device, String>(), new ToStringLabeller<Device>())));
         vv.getRenderContext().setVertexLabelTransformer(vertexLabelTransformer);
         vv.getRenderContext().setEdgeLabelTransformer(new Transformer<ComLink, String>() {
             @Override
@@ -246,9 +246,11 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
         };
         Transformer<ComLink, Paint> edgePaint = new Transformer<ComLink, Paint>() {
             public Paint transform(ComLink l) {
-                if(l.isDown())
-                return Color.RED;
-                else return Color.BLACK;
+                if (l.isDown()) {
+                    return Color.RED;
+                } else {
+                    return Color.BLACK;
+                }
             }
         };
         vv.getRenderContext().setEdgeDrawPaintTransformer(edgePaint);
@@ -416,10 +418,14 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                 System.out.println("Running the simulation...");
                 //scheduledExecutorService.execute(runner);
                 for (Device device : Topology.getInstance().getGraph().getVertices()) {
-                    device.start();
+                    if (!device.isAlive()) {
+                        device.start();
+                    }
                 }
                 for (ComLink link : Topology.getInstance().getGraph().getEdges()) {
-                    link.start();
+                    if (!link.isAlive()) {
+                        link.start();
+                    }
                 }
                 for (EventConsumer c : simu.getConsumers()) {
                     for (EPUnit op : c.getGraph().getVertices()) {
@@ -799,11 +805,10 @@ public class GraphEditor extends JApplet implements Printable, Serializable {
                         } else if (metadata.getProperty("deviceType").equals("Utility")) {
                             v = new UtilityDevice(deviceName, cpuSpeeed, totalMemory);
                             DeviceFactory.setUtilityCount(DeviceFactory.getUtilityCount() + 1);
-                        }else if (metadata.getProperty("deviceType").equals("POSTE ASSERVI")) {
+                        } else if (metadata.getProperty("deviceType").equals("POSTE ASSERVI")) {
                             v = new PADevice(deviceName, cpuSpeeed, totalMemory);
                             DeviceFactory.setPaCount(DeviceFactory.getPaCount() + 1);
-                        }
-                        else {
+                        } else {
                             v = new DCDevice(deviceName, cpuSpeeed, totalMemory);
                             DeviceFactory.setDcCount(DeviceFactory.getDcCount() + 1);
                         }

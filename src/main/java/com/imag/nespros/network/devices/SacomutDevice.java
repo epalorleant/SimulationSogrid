@@ -22,7 +22,7 @@ public class SacomutDevice extends Device {
     public SacomutDevice(String name) {
         super(name);
         this.setCpuSpeed(350);
-        this.setTotalMemory(5000);
+        this.setTotalMemory(1024);
         this.setDeviceType(DeviceType.SACOMUT);
         this.setDeviceName(name);
         try {

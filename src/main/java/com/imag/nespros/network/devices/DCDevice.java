@@ -23,7 +23,7 @@ public class DCDevice extends Device {
     public DCDevice(String name) {
         super(name);
         this.setCpuSpeed(100);
-        this.setTotalMemory(700);
+        this.setTotalMemory(512);
         this.setDeviceType(DeviceType.DC);
         this.setDeviceName(name);
          

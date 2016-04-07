@@ -5,7 +5,7 @@
 package com.imag.nespros.runtime.qosmonitor;
 
 import com.imag.nespros.runtime.core.EPUnit;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
@@ -29,7 +29,7 @@ public class QoSMonitor {
     private ArrayList<EPUnit> EPNetwork;
     private final ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture scheduledFuture = null;
-    private final MyLogger logger;
+    private final LoggerUtil logger;
     private int mode;
     private long _frequency;
     private MonitoringTask mTask;
@@ -40,7 +40,7 @@ public class QoSMonitor {
         EPNetwork = new ArrayList<>();
         mode = MODE_STAT_COLLECT;
         scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        logger = new MyLogger("QoSMeasures");
+        logger = new LoggerUtil("QoSMeasures");
         logger.log("EPU_IDENTIFIER, EPU_INFO, #EPU_NETWORK_NOTIFICATION, EPU_MEAN_NOTIFICATION_LATENCY, EPU_OUTPUTQ_CAPACITY, EPU_PROCESSING_TIME, #EVENTS_PROCESSED, #EVENTS_PRODUCED, #INPUTQ_DEFAULTS, BATCH_SIZE");
         mTask = new MonitoringTask(this);
     }
@@ -137,7 +137,7 @@ public class QoSMonitor {
         this.EPNetwork = EPNetwork;
     }
 
-    public MyLogger getLogger() {
+    public LoggerUtil getLogger() {
         return logger;
     }
 }

@@ -9,7 +9,7 @@ import com.google.common.collect.Queues;
 import com.imag.nespros.network.devices.Device;
 import com.imag.nespros.runtime.base.BoundedPriorityBlockingQueue;
 import com.imag.nespros.runtime.event.EventBean;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import com.imag.nespros.runtime.qosmonitor.QoSConstraint;
 
 import java.util.Collection;
@@ -21,7 +21,7 @@ import java.util.logging.Logger;
 import rx.subjects.PublishSubject;
 import rx.subjects.Subject;
 
-//import log.MyLogger;
+//import log.LoggerUtil;
 
 /**
  *
@@ -47,7 +47,7 @@ public abstract class EPUnit extends Thread {
     public volatile int numEventProduced = 0;
     public volatile long processingTime = 0;
     protected short selectionMode = SelectionMode.MODE_PRIORITY;
-    protected MyLogger logger;
+    protected LoggerUtil logger;
     protected ExecutorService executorService;
     WindowHandler _handler;
     private Subject<EventBean, EventBean> _sourceStream;
@@ -118,7 +118,7 @@ public abstract class EPUnit extends Thread {
         return topics;
     }
 
-    public MyLogger getLogger() {
+    public LoggerUtil getLogger() {
         return logger;
     }
 

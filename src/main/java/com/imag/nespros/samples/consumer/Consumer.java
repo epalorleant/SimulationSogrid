@@ -7,7 +7,7 @@ package com.imag.nespros.samples.consumer;
 
 import com.imag.nespros.runtime.client.AnEventHandler;
 import com.imag.nespros.runtime.event.EventBean;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import java.util.Calendar;
 
 
@@ -19,10 +19,10 @@ import java.util.Calendar;
 public class Consumer extends AnEventHandler {
 
     private boolean isQoS = false;
-    MyLogger logger;
+    LoggerUtil logger;
 
     public Consumer() {
-        logger = new MyLogger("latencies");
+        logger = new LoggerUtil("latencies");
     }
 
     @Override

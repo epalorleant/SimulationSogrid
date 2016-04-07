@@ -12,7 +12,7 @@ import com.imag.nespros.gui.animation.EdgeAnimation;
 import com.imag.nespros.gui.plugin.GraphEditor;
 import com.imag.nespros.network.routing.DataPacket;
 import com.imag.nespros.network.routing.Topology;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -38,7 +38,7 @@ public class ComLink extends Thread {
     // for display control
     private int definedlatency;
     private Normal normalDist;
-    private MyLogger logger;
+    private LoggerUtil logger;
     private Binomial bernoulliDist;
 
     //private double var;
@@ -55,7 +55,7 @@ public class ComLink extends Thread {
         //outputPort2 = new Sim_port("Out2");
         //add_port(outputPort2);
         pendingPackets = new LinkedBlockingQueue<>();
-        logger = new MyLogger("Latencies_" + ID);
+        logger = new LoggerUtil("Latencies_" + ID);
         down = false;
         //delay = new Sim_normal_obj("Latency", latency, var);
         latency = 10;

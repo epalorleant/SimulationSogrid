@@ -67,7 +67,7 @@ public class MeterSimulator extends EventProducer {
                         //evt.getHeader().setPriority((short) random.nextInt(5));
                         evt.getHeader().setPriority((short)1);
                         evt.getHeader().setDetectionTime(System.currentTimeMillis());
-                        sendEvent(evt);
+                        publish(evt);
                         System.out.println(" next event generated... (N° " + i + "): " + evt.payload);
                         i++;
                         double value = Double.parseDouble(evt.getValue(attribute).toString());
@@ -118,7 +118,7 @@ public class MeterSimulator extends EventProducer {
                         //EventBean e = producer.createEventWithPayload(evt);
                         evt.getHeader().setPriority((short) random.nextInt(5));
                         evt.getHeader().setDetectionTime(System.currentTimeMillis());
-                        sendEvent(evt);
+                        publish(evt);
                         Thread.sleep(delay);
                     }
                     System.out.println("End Simulation N°" + passage + "...");

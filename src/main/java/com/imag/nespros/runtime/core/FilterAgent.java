@@ -9,7 +9,7 @@ package com.imag.nespros.runtime.core;
 
 import com.imag.nespros.runtime.base.Func1;
 import com.imag.nespros.runtime.event.EventBean;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import com.imag.nespros.runtime.qosmonitor.QoSTuner;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +41,7 @@ public class FilterAgent extends EPUnit {
         _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
         //Queue<EventBean> selected1 = Queues.newArrayDeque();
         //_selectedEvents[0] = selected1;
-        logger = new MyLogger("FilterMeasures");
+        logger = new LoggerUtil("FilterMeasures");
         logger.log("Operator, isProduced, Processing Time, InputQ Size, OutputQ Size ");
         executorService = Executors.newSingleThreadExecutor();
     }

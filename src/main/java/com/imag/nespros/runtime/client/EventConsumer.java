@@ -24,7 +24,7 @@ public class EventConsumer extends EPUnit implements Subscriber {
     String _input;
     AnEventHandler _handler;
     private ArrayList<EPUnit> epuList;
-    DirectedSparseGraph<EPUnit, EventChannel> graph;
+    private DirectedSparseGraph<EPUnit, EventChannel> graph;
 
     public EventConsumer(String _info, String _inputTerm) {
         this(_info);
@@ -157,10 +157,15 @@ public class EventConsumer extends EPUnit implements Subscriber {
             }
 
         }
+         ArrayList<EPUnit> remove = new ArrayList<>();
         for (EPUnit op : graph.getVertices()) {
             if ((op instanceof EventProducer) && graph.outDegree(op) == 0) {
-                graph.removeVertex(op);
+                remove.add(op);
             }
         }
+        for(EPUnit op: remove){
+            graph.removeVertex(op);
+        }
+       
     }
 }

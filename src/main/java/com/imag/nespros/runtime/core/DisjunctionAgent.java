@@ -6,7 +6,7 @@
 package com.imag.nespros.runtime.core;
 
 import com.imag.nespros.runtime.event.EventBean;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import com.imag.nespros.runtime.qosmonitor.QoSTuner;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +34,7 @@ public class DisjunctionAgent extends EPUnit {
         }
         outputTerminal = new IOTerminal(IDoutputTerminal, "output channel " + _type, this);
         _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
-        logger = new MyLogger("DisjunctionMeasures");
+        logger = new LoggerUtil("DisjunctionMeasures");
         logger.log("Operator, isProduced, Processing Time, InputQ Size, OutputQ Size ");
     }
 

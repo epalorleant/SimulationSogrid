@@ -7,6 +7,9 @@
 package com.imag.nespros;
 
 import com.imag.nespros.gui.plugin.GraphEditor;
+import com.imag.nespros.network.devices.ComLink;
+import com.imag.nespros.network.devices.Device;
+import com.imag.nespros.network.routing.Topology;
 import com.imag.nespros.runtime.client.EventConsumer;
 import com.imag.nespros.runtime.client.EventProducer;
 import java.util.ArrayList;
@@ -19,7 +22,7 @@ public class Simulation {
     private ArrayList<EventProducer> producers;
     private ArrayList<EventConsumer> consumers;
     private static GraphEditor g;
-
+    
     public Simulation() {
         producers = new ArrayList<>();
         consumers = new ArrayList<>();
@@ -65,5 +68,11 @@ public class Simulation {
         setup();
         g= GraphEditor.getInstance(this); 
         
+    }
+    public void addDevice(Device d){
+        Topology.getInstance().getGraph().addVertex(d);
+    }
+    public void addComLink(ComLink l, Device d1, Device d2 ){
+        Topology.getInstance().getGraph().addEdge(l, d1, d2);
     }
 }

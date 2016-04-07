@@ -23,7 +23,7 @@ public class HTACoordDevice extends Device {
     public HTACoordDevice(String name) {
          super(name);
         this.setCpuSpeed(500);
-        this.setTotalMemory(10000);
+        this.setTotalMemory(16000);
         this.setDeviceType(DeviceType.HTA_COORD);
         this.setDeviceName(name);
         try {

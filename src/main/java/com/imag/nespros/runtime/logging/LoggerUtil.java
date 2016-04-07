@@ -14,7 +14,7 @@ import java.util.logging.SimpleFormatter;
  *
  * @author Orleant
  */
-public class MyLogger {
+public class LoggerUtil {
 
     private String fileName;
     private FileHandler fileTxt;
@@ -22,7 +22,7 @@ public class MyLogger {
     //private String classname;
     private Logger logger;
 
-    public MyLogger(String fileName) {
+    public LoggerUtil(String fileName) {
         this.fileName = fileName;
         //this.classname = classname;
         parametrer();

@@ -6,7 +6,7 @@ package com.imag.nespros.runtime.core;
 
 import com.imag.nespros.runtime.base.NameValuePair;
 import com.imag.nespros.runtime.event.EventBean;
-import com.imag.nespros.runtime.logging.MyLogger;
+import com.imag.nespros.runtime.logging.LoggerUtil;
 import com.imag.nespros.runtime.qosmonitor.QoSTuner;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class AggregatorAgent extends EPUnit {
         inputTerminal = new IOTerminal(IDinputTerminal, "input channel " + _type, _receivers[0], this);
         outputTerminal = new IOTerminal(IDoutputTerminal, "output channel " + _type, this);
         _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
-        logger = new MyLogger("AggregatorMeasures");
+        logger = new LoggerUtil("AggregatorMeasures");
         logger.log("Operator, isProduced, Processing Time, InputQ Size, OutputQ Size ");
     }
 
@@ -43,7 +43,7 @@ public class AggregatorAgent extends EPUnit {
         this._type = "Aggregator";
         this._receivers[0] = new TopicReceiver(this);
         _outputNotifier = new OQNotifier(this, QoSTuner.NOTIFICATION_PRIORITY);
-        logger = new MyLogger("AggregatorMeasures");
+        logger = new LoggerUtil("AggregatorMeasures");
         //logger.log("Operator, isProduced, Processing Time, InputQ Size, OutputQ Size ");
     }
 

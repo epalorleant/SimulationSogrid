@@ -7,7 +7,6 @@
 package com.imag.nespros.network.devices;
 
 import com.imag.nespros.gui.plugin.MyLayeredIcon;
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +34,7 @@ public class AMIDevice extends Device {
     public AMIDevice(String name) {
         super(name);
         this.setCpuSpeed(10);
-        this.setTotalMemory(1000);
+        this.setTotalMemory(128);
         this.setDeviceType(DeviceType.AMI);
         this.setDeviceName(name); 
         //String imageURI = getClass().getClassLoader().getResource("image"+File.separator+"meter.jpeg").getFile();

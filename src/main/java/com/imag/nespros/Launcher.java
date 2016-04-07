@@ -40,7 +40,7 @@ public class Launcher {
     static String[] types = {"long", "double", "String"};
     static char Sep = File.separatorChar;
     final static String path = "microgrid";
-    static int NUMBER = 3;
+    static int NUMBER = 2;
     static long delay = 5000;
     static int duration = 0;
     
@@ -98,12 +98,14 @@ public class Launcher {
        String[] inputOr = new String[NUMBER];
         for (int i = 0; i < listOfFiles.length; i++) {
             if ( i < NUMBER) {                                              
-                MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"MeterEvent", 
+               /* MeterSimulator simulator = new MeterSimulator(listOfFiles[i].substring(path.length()+1),"MeterEvent", 
                         r.getRessource(listOfFiles[i]), meterSchema, types, delay, MeterEvent.class)
                         .simulate("realPowerWatts");
-                 //operators.add(simulator);                                
-                simulator.setMapped(false); 
-                //utility.getEPUList().add(simulator);
+                       */
+                 MeterSimulator simulator = new MeterSimulator("P"+i,"MeterEvent", 
+                        r.getRessource(listOfFiles[i]), meterSchema, types, delay, MeterEvent.class)
+                        .simulate("realPowerWatts");
+                simulator.setMapped(false);                 
                 s.addProducer(simulator);
                 inputOr[i]= simulator.getOutputTopic();
             }
@@ -111,7 +113,7 @@ public class Launcher {
                 break;
             }
         }
-         ConjunctionAgent or = new ConjunctionAgent("AND", inputOr, "MeterEvent");
+         ConjunctionAgent or = new ConjunctionAgent("OR", inputOr, "MeterEvent");
          or.setUsedMemory(20);
          or.setExecutionTime(20);
          or.setWindowHandler(new SlidingWindow(6000, 1000, TimeUnit.MILLISECONDS));
